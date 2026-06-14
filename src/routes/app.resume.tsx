@@ -1,0 +1,151 @@
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { ArrowRight, CloudUpload, Download, FileText, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
+import { PageHeader } from "@/components/app-shell";
+
+export const Route = createFileRoute("/app/resume")({
+  head: () => ({ meta: [{ title: "Resume — CareerPilot AI" }] }),
+  component: Resume,
+});
+
+const versions = [
+  { v: "v4", file: "arjun-kumar-frontend.pdf", date: "Mar 04, 2026", score: 78, current: true, notes: "Added 2 projects, TS depth, Vitest" },
+  { v: "v3", file: "arjun-kumar-frontend.pdf", date: "Jan 12, 2026", score: 66, notes: "First post-bootcamp polish" },
+  { v: "v2", file: "arjun-resume-draft.docx", date: "Nov 22, 2025", score: 58 },
+  { v: "v1", file: "resume-original.pdf", date: "Oct 03, 2025", score: 41 },
+];
+
+function Resume() {
+  return (
+    <div className="mx-auto max-w-6xl">
+      <PageHeader
+        eyebrow="Resume"
+        title="Your resume, versioned."
+        description="Upload a new version to re-analyze. Compare any two to see what changed."
+        actions={
+          <Link
+            to="/app/compare"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium hover:bg-accent"
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Compare versions
+          </Link>
+        }
+      />
+
+      <div className="grid grid-cols-12 gap-4">
+        <section className="col-span-12 lg:col-span-7">
+          <label className="block">
+            <div className="group relative cursor-pointer rounded-xl border-2 border-dashed border-border bg-card p-10 text-center transition-colors hover:border-primary/50 hover:bg-primary-soft/30">
+              <div className="absolute inset-0 grid-bg opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+              <div className="relative">
+                <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl border border-border bg-background text-primary shadow-xs">
+                  <CloudUpload className="h-5 w-5" />
+                </div>
+                <div className="mt-4 text-sm font-medium">Drop your resume here, or click to upload</div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  PDF or DOCX · up to 5 MB · we'll analyze automatically
+                </p>
+                <div className="mt-5 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
+                  <FileText className="h-3.5 w-3.5" /> Choose file
+                </div>
+              </div>
+              <input type="file" className="sr-only" />
+            </div>
+          </label>
+
+          <Link
+            to="/app/analysis"
+            className="mt-4 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            Skip upload, see analysis demo <ArrowRight className="h-3 w-3" />
+          </Link>
+        </section>
+
+        <aside className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs lg:col-span-5">
+          <div className="text-xs font-medium">Current resume</div>
+          <div className="mt-3 flex items-center gap-3">
+            <div className="grid h-12 w-12 place-items-center rounded-lg border border-border bg-surface text-primary">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-medium">{versions[0].file}</div>
+              <div className="text-[11px] text-muted-foreground">v4 · uploaded {versions[0].date}</div>
+            </div>
+            <span className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success">Analyzed</span>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+            <Mini label="Readiness" value="78" />
+            <Mini label="Skills" value="42" />
+            <Mini label="Gaps" value="11" />
+          </div>
+          <div className="mt-4 flex gap-2">
+            <button className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-background text-xs hover:bg-accent">
+              <Download className="h-3.5 w-3.5" /> Download
+            </button>
+            <Link
+              to="/app/insights"
+              className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-foreground text-xs font-medium text-background hover:opacity-90"
+            >
+              View insights
+            </Link>
+          </div>
+        </aside>
+
+        <section className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs font-medium">Version history</div>
+              <div className="text-xs text-muted-foreground">All resumes stay private to your workspace.</div>
+            </div>
+            <button className="text-xs text-primary hover:underline">Export all</button>
+          </div>
+          <div className="mt-4 overflow-hidden rounded-lg border border-border">
+            <div className="grid grid-cols-12 gap-3 border-b border-border bg-surface px-4 py-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <div className="col-span-1">Ver.</div>
+              <div className="col-span-5">File</div>
+              <div className="col-span-2">Uploaded</div>
+              <div className="col-span-2">Readiness</div>
+              <div className="col-span-2 text-right">Actions</div>
+            </div>
+            {versions.map((v) => (
+              <div key={v.v} className="grid grid-cols-12 items-center gap-3 border-b border-border bg-background px-4 py-3 last:border-b-0 text-sm">
+                <div className="col-span-1">
+                  <span className={
+                    "rounded-md border px-1.5 py-0.5 text-[11px] font-medium " +
+                    (v.current ? "border-primary bg-primary-soft text-primary" : "border-border bg-surface text-muted-foreground")
+                  }>{v.v}</span>
+                </div>
+                <div className="col-span-5 min-w-0">
+                  <div className="truncate font-medium">{v.file}</div>
+                  <div className="truncate text-[11px] text-muted-foreground">{v.notes ?? "—"}</div>
+                </div>
+                <div className="col-span-2 text-xs text-muted-foreground">{v.date}</div>
+                <div className="col-span-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 text-xs tabular-nums">{v.score}</span>
+                    <div className="h-1 flex-1 rounded-full bg-border">
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${v.score}%` }} />
+                    </div>
+                  </div>
+                </div>
+                <div className="col-span-2 flex items-center justify-end gap-1 text-muted-foreground">
+                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><Download className="h-3.5 w-3.5" /></button>
+                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><Trash2 className="h-3.5 w-3.5" /></button>
+                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><MoreHorizontal className="h-3.5 w-3.5" /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Mini({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-border bg-background py-2">
+      <div className="text-base font-semibold tabular-nums">{value}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+    </div>
+  );
+}
