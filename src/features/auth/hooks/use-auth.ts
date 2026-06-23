@@ -1,130 +1,42 @@
 /**
  * useAuth
  *
- * Provides reactive auth state (user, session, isLoading, isAuthenticated)
- * and action helpers (signIn, signUp, signOut) to any component.
+ * Public API for consuming authentication state and actions.
  *
- * Session persistence is handled automatically: Supabase persists the JWT
- * in localStorage and this hook re-hydrates it on mount via onAuthStateChange.
+ * This hook is now a thin wrapper around AuthContext — it holds no local
+ * state and registers no subscriptions. All state lives in <AuthProvider>.
+ *
+ * Usage:
+ *   const { user, isLoading, signIn, signOut } = useAuth();
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { authService } from '../services/auth.service';
-import type { AuthState, AuthServiceError, AuthUser, AuthSession } from '../types';
+import { useAuthContext } from '../providers/AuthProvider';
+import type { AuthContextValue } from '../providers/AuthProvider';
+import type { AuthUser, AuthSession } from '../types';
 
-// ─── Public hook API ──────────────────────────────────────────────────────────
+// Re-export the context shape so consumers can type against UseAuthReturn
+// without importing from the provider directly.
+export type UseAuthReturn = AuthContextValue;
 
-export interface UseAuthReturn extends AuthState {
-    /** Sign in with email + password. Returns an error string on failure. */
-    signIn(email: string, password: string): Promise<AuthServiceError | null>;
-    /** Register with email + password. Returns an error string on failure. */
-    signUp(email: string, password: string): Promise<AuthServiceError | null>;
-    /** Sign out the current user. */
-    signOut(): Promise<AuthServiceError | null>;
-}
-
-// ─── Hook ─────────────────────────────────────────────────────────────────────
-
+/**
+ * useAuth — primary hook for all auth state and actions.
+ *
+ * Throws if called outside <AuthProvider>.
+ */
 export function useAuth(): UseAuthReturn {
-    const [state, setState] = useState<AuthState>({
-        user: null,
-        session: null,
-        isLoading: true,    // start true — we don't know the session yet
-        isAuthenticated: false,
-    });
-
-    // Track mount status to avoid state updates after unmount
-    const mountedRef = useRef(true);
-    useEffect(() => {
-        mountedRef.current = true;
-        return () => {
-            mountedRef.current = false;
-        };
-    }, []);
-
-    // ─── Session hydration & listener ──────────────────────────────────────────
-
-    useEffect(() => {
-        // 1. Load the persisted session synchronously from storage
-        void authService.getSession().then(({ data: session }) => {
-            if (!mountedRef.current) return;
-            setState({
-                user: session?.user ?? null,
-                session,
-                isLoading: false,
-                isAuthenticated: session !== null,
-            });
-        });
-
-        // 2. Subscribe to future auth state changes (sign-in, sign-out, token refresh)
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (!mountedRef.current) return;
-            setState({
-                user: session?.user ?? null,
-                session,
-                isLoading: false,
-                isAuthenticated: session !== null,
-            });
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, []);
-
-    // ─── Actions ───────────────────────────────────────────────────────────────
-
-    const signIn = useCallback(
-        async (email: string, password: string): Promise<AuthServiceError | null> => {
-            setState((prev) => ({ ...prev, isLoading: true }));
-            const { error } = await authService.signIn(email, password);
-            // onAuthStateChange will update the session state on success
-            if (mountedRef.current) {
-                setState((prev) => ({ ...prev, isLoading: false }));
-            }
-            return error;
-        },
-        [],
-    );
-
-    const signUp = useCallback(
-        async (email: string, password: string): Promise<AuthServiceError | null> => {
-            setState((prev) => ({ ...prev, isLoading: true }));
-            const { error } = await authService.signUp(email, password);
-            if (mountedRef.current) {
-                setState((prev) => ({ ...prev, isLoading: false }));
-            }
-            return error;
-        },
-        [],
-    );
-
-    const signOut = useCallback(async (): Promise<AuthServiceError | null> => {
-        setState((prev) => ({ ...prev, isLoading: true }));
-        const { error } = await authService.signOut();
-        // onAuthStateChange will clear the session state on success
-        if (mountedRef.current) {
-            setState((prev) => ({ ...prev, isLoading: false }));
-        }
-        return error;
-    }, []);
-
-    return { ...state, signIn, signUp, signOut };
+    return useAuthContext();
 }
 
-// ─── Selectors (lightweight derived hooks) ────────────────────────────────────
+// ─── Focused selector hooks ───────────────────────────────────────────────────
+// These prevent unnecessary re-renders in components that only need a slice
+// of auth state.
 
-/** Returns only the current user — avoids re-renders from session/loading changes. */
+/** Returns only the authenticated user, or null if unauthenticated. */
 export function useCurrentUser(): AuthUser | null {
-    const { user } = useAuth();
-    return user;
+    return useAuthContext().user;
 }
 
-/** Returns only the current session. */
+/** Returns only the current session, or null if unauthenticated. */
 export function useSession(): AuthSession | null {
-    const { session } = useAuth();
-    return session;
+    return useAuthContext().session;
 }

@@ -18,6 +18,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { useAuth } from "@/features/auth";
+import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 
 const nav = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -190,7 +191,9 @@ export function AppShell() {
         </header>
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
-          <Outlet />
+          <ProtectedRoute>
+            <Outlet />
+          </ProtectedRoute>
         </main>
       </div>
     </div>

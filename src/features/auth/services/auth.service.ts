@@ -15,6 +15,19 @@ import type {
 } from '../types';
 import { normalizeAuthError } from '../types';
 
+// ─── Subscription callback type ───────────────────────────────────────────────
+
+/**
+ * Called whenever the Supabase auth state changes.
+ * Receives the new session, or null when the user is signed out.
+ */
+export type AuthStateChangeCallback = (session: AuthSession | null) => void;
+
+/**
+ * Returned by subscribeToAuthChanges — call it to unsubscribe.
+ */
+export type AuthUnsubscribe = () => void;
+
 // ─── Service interface ────────────────────────────────────────────────────────
 
 export interface IAuthService {
@@ -23,6 +36,14 @@ export interface IAuthService {
     signOut(): Promise<AuthResult>;
     getCurrentUser(): Promise<AuthResult<AuthUser>>;
     getSession(): Promise<AuthResult<AuthSession>>;
+    /**
+     * Subscribe to Supabase auth state changes.
+     * The callback receives the new session on every auth event
+     * (sign-in, sign-out, token refresh, password recovery, etc.).
+     *
+     * @returns An unsubscribe function. Call it when the listener is no longer needed.
+     */
+    subscribeToAuthChanges(callback: AuthStateChangeCallback): AuthUnsubscribe;
 }
 
 // ─── Implementation ──────────────────────────────────────────────────────────
@@ -126,6 +147,27 @@ class AuthService implements IAuthService {
         } catch (err) {
             return { data: null, error: normalizeAuthError(err) };
         }
+    }
+
+    /**
+     * Subscribe to Supabase auth state changes.
+     *
+     * Wraps supabase.auth.onAuthStateChange so that no file outside this
+     * service ever needs to import the Supabase client for auth event listening.
+     *
+     * @param callback - Invoked with the new (or null) session on every auth event.
+     * @returns An unsubscribe function. Call it in a cleanup effect.
+     */
+    subscribeToAuthChanges(callback: AuthStateChangeCallback): AuthUnsubscribe {
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            callback(session);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }
 
     // ─── Private helpers ────────────────────────────────────────────────────────
