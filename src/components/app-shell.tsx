@@ -1,4 +1,4 @@
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Bell,
   ChevronDown,
@@ -17,6 +17,7 @@ import {
   User,
   CalendarDays,
 } from "lucide-react";
+import { useAuth } from "@/features/auth";
 
 const nav = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -30,6 +31,21 @@ const nav = [
 
 export function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
+
+  async function handleSignOut() {
+    await signOut();
+    await navigate({ to: '/auth/login', replace: true });
+  }
+
+  // Derive display initials from the user's email
+  const initials = user?.email
+    ? user.email.slice(0, 2).toUpperCase()
+    : 'ME';
+  const displayName = user?.email
+    ? user.email.split('@')[0]
+    : 'Account';
 
   return (
     <div className="min-h-screen bg-surface text-foreground">
@@ -114,7 +130,10 @@ export function AppShell() {
             <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
               <Settings className="h-3.5 w-3.5" /> Settings
             </button>
-            <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            >
               <LogOut className="h-3.5 w-3.5" /> Sign out
             </button>
           </div>
@@ -163,9 +182,9 @@ export function AppShell() {
             </button>
             <div className="ml-1 flex h-8 items-center gap-2 rounded-md border border-border bg-surface pl-1 pr-2">
               <div className="grid h-6 w-6 place-items-center rounded-md bg-primary text-[10px] font-semibold text-primary-foreground">
-                AK
+                {initials}
               </div>
-              <span className="hidden text-xs font-medium sm:inline">Arjun K.</span>
+              <span className="hidden text-xs font-medium sm:inline">{displayName}</span>
             </div>
           </div>
         </header>

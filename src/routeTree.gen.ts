@@ -12,7 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AuthSignupRouteImport } from './routes/auth.signup'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AppSuggestionsRouteImport } from './routes/app.suggestions'
 import { Route as AppRoadmapRouteImport } from './routes/app.roadmap'
 import { Route as AppResumeRouteImport } from './routes/app.resume'
@@ -39,10 +42,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AppSuggestionsRoute = AppSuggestionsRouteImport.update({
   id: '/suggestions',
@@ -98,7 +116,7 @@ const AppAnalysisRoute = AppAnalysisRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/app/analysis': typeof AppAnalysisRoute
   '/app/compare': typeof AppCompareRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -109,11 +127,13 @@ export interface FileRoutesByFullPath {
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
   '/app/suggestions': typeof AppSuggestionsRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/app/': typeof AppIndexRoute
+  '/auth/': typeof AuthIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/app/analysis': typeof AppAnalysisRoute
   '/app/compare': typeof AppCompareRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -124,13 +144,16 @@ export interface FileRoutesByTo {
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
   '/app/suggestions': typeof AppSuggestionsRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/app': typeof AppIndexRoute
+  '/auth': typeof AuthIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/app/analysis': typeof AppAnalysisRoute
   '/app/compare': typeof AppCompareRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -141,7 +164,10 @@ export interface FileRoutesById {
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
   '/app/suggestions': typeof AppSuggestionsRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/app/': typeof AppIndexRoute
+  '/auth/': typeof AuthIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,11 +185,13 @@ export interface FileRouteTypes {
     | '/app/resume'
     | '/app/roadmap'
     | '/app/suggestions'
+    | '/auth/login'
+    | '/auth/signup'
     | '/app/'
+    | '/auth/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
     | '/app/analysis'
     | '/app/compare'
     | '/app/dashboard'
@@ -174,7 +202,10 @@ export interface FileRouteTypes {
     | '/app/resume'
     | '/app/roadmap'
     | '/app/suggestions'
+    | '/auth/login'
+    | '/auth/signup'
     | '/app'
+    | '/auth'
   id:
     | '__root__'
     | '/'
@@ -190,13 +221,16 @@ export interface FileRouteTypes {
     | '/app/resume'
     | '/app/roadmap'
     | '/app/suggestions'
+    | '/auth/login'
+    | '/auth/signup'
     | '/app/'
+    | '/auth/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -222,12 +256,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/app/': {
       id: '/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/app/suggestions': {
       id: '/app/suggestions'
@@ -332,10 +387,24 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AuthRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthSignupRoute: typeof AuthSignupRoute
+  AuthIndexRoute: typeof AuthIndexRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthSignupRoute: AuthSignupRoute,
+  AuthIndexRoute: AuthIndexRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
