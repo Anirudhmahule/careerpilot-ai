@@ -1,6 +1,7 @@
 // ─── Role union ───────────────────────────────────────────────────────────────
 
 export type JourneyRole =
+    | 'Software Engineer'
     | 'Frontend Engineer'
     | 'React Developer'
     | 'Full Stack Engineer'

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/features/auth";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
+import { OnboardingGate } from "@/features/journey/components/OnboardingGate";
 
 const nav = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -192,7 +193,9 @@ export function AppShell() {
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
           <ProtectedRoute>
-            <Outlet />
+            <OnboardingGate>
+              <Outlet />
+            </OnboardingGate>
           </ProtectedRoute>
         </main>
       </div>

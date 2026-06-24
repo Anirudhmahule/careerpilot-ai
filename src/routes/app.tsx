@@ -12,9 +12,8 @@ import { authService } from '@/features/auth';
 
 export const Route = createFileRoute('/app')({
   beforeLoad: async ({ location }) => {
-    const { data: session } = await authService.getSession();
-
-    if (!session) {
+    const { data: user } = await authService.getCurrentUser();
+    if (!user) {
       throw redirect({
         to: '/auth/login',
         search: { redirect: location.href },
