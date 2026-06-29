@@ -1,6 +1,8 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, CloudUpload, Download, FileText, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
+import { useResume } from "@/features/resume/hooks/useResume";
+import { useJourney } from "@/features/journey/hooks/useJourney";
 
 export const Route = createFileRoute("/app/resume")({
   head: () => ({ meta: [{ title: "Resume — CareerPilot AI" }] }),
@@ -15,6 +17,17 @@ const versions = [
 ];
 
 function Resume() {
+  const { isLoading, error, uploadResume } = useResume();
+  const { journey } = useJourney();
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    // Reset input so the same file can be re-selected after an error.
+    e.target.value = "";
+    if (!file || !journey) return;
+    await uploadResume(file, journey.id);
+  }
+
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
@@ -33,7 +46,7 @@ function Resume() {
 
       <div className="grid grid-cols-12 gap-4">
         <section className="col-span-12 lg:col-span-7">
-          <label className="block">
+          <label className={`block${isLoading ? " pointer-events-none opacity-60" : ""}`}>
             <div className="group relative cursor-pointer rounded-xl border-2 border-dashed border-border bg-card p-10 text-center transition-colors hover:border-primary/50 hover:bg-primary-soft/30">
               <div className="absolute inset-0 grid-bg opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
               <div className="relative">
@@ -42,15 +55,26 @@ function Resume() {
                 </div>
                 <div className="mt-4 text-sm font-medium">Drop your resume here, or click to upload</div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  PDF or DOCX · up to 5 MB · we'll analyze automatically
+                  PDF · up to 5 MB · we'll analyze automatically
                 </p>
                 <div className="mt-5 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
-                  <FileText className="h-3.5 w-3.5" /> Choose file
+                  <FileText className="h-3.5 w-3.5" /> {isLoading ? "Uploading…" : "Choose file"}
                 </div>
               </div>
-              <input type="file" className="sr-only" />
+              <input
+                type="file"
+                accept="application/pdf"
+                disabled={isLoading}
+                onChange={handleFileChange}
+                className="sr-only"
+              />
             </div>
           </label>
+
+          {/* Upload error — shown only when useResume reports a failure */}
+          {error && (
+            <p className="mt-2 text-xs text-destructive">{error.message}</p>
+          )}
 
           <Link
             to="/app/analysis"
