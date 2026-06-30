@@ -25,7 +25,7 @@ export interface UseAnalysisReturn {
      * Automatically triggers a state refresh on success.
      * Returns an error on failure, null on success.
      */
-    createSnapshot(request: CreateAnalysisSnapshotRequest): Promise<AnalysisHookError | null>;
+    createSnapshot(request: CreateAnalysisSnapshotRequest): Promise<{ error: AnalysisHookError | null; data: AnalysisSnapshot | null }>;
     /**
      * Update an existing analysis snapshot.
      * Automatically triggers a state refresh on success.
@@ -99,24 +99,24 @@ export function useAnalysis(resumeVersionId?: string): UseAnalysisReturn {
     // ─── Actions ─────────────────────────────────────────────────────────────────
 
     const createSnapshot = useCallback(
-        async (request: CreateAnalysisSnapshotRequest): Promise<AnalysisHookError | null> => {
+        async (request: CreateAnalysisSnapshotRequest): Promise<{ error: AnalysisHookError | null; data: AnalysisSnapshot | null }> => {
             setIsLoading(true);
             setError(null);
 
-            const { error: serviceError } = await analysisService.createSnapshot(request);
+            const { data, error: serviceError } = await analysisService.createSnapshot(request);
 
-            if (!mountedRef.current) return null;
+            if (!mountedRef.current) return { error: null, data: null };
 
             if (serviceError) {
                 setError(serviceError);
                 setIsLoading(false);
-                return serviceError;
+                return { error: serviceError, data: null };
             }
 
             // Refresh state via DB reload instead of manually mutating local state
             await loadSnapshots(request.resume_version_id);
             
-            return null;
+            return { error: null, data };
         },
         [loadSnapshots]
     );

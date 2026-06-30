@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": [],
+    "moduleResolution": "bundler",
+    "strict": true
+  },
+  "exclude": ["node_modules"]
+}

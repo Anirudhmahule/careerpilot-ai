@@ -1,8 +1,10 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CloudUpload, Download, FileText, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
 import { useResume } from "@/features/resume/hooks/useResume";
 import { useJourney } from "@/features/journey/hooks/useJourney";
+import { useAnalysis } from "@/features/analysis/hooks/useAnalysis";
+import { analysisAiService } from "@/features/analysis/services/analysis-ai.service";
 
 export const Route = createFileRoute("/app/resume")({
   head: () => ({ meta: [{ title: "Resume — CareerPilot AI" }] }),
@@ -23,6 +25,8 @@ function formatDate(iso?: string): string {
 function Resume() {
   const { isLoading, error, uploadResume, latestResume, resumes, deleteResume, getDownloadUrl } = useResume();
   const { journey } = useJourney();
+  const navigate = useNavigate();
+  const { createSnapshot, isLoading: isAnalysisLoading } = useAnalysis(latestResume?.id);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -36,6 +40,20 @@ function Resume() {
     const url = await getDownloadUrl(storagePath);
     if (url) {
       window.open(url, "_blank");
+    }
+  }
+
+  async function handleAnalyze() {
+    if (!latestResume) return;
+    const { error: err, data: snapshot } = await createSnapshot({
+      resume_version_id: latestResume.id,
+      model: "gpt-5.5",
+      prompt_version: "v1"
+    });
+    
+    if (!err && snapshot) {
+      void analysisAiService.invokeAnalysis(snapshot.id, latestResume.storage_path);
+      void navigate({ to: "/app/analysis" });
     }
   }
 
@@ -125,12 +143,13 @@ function Resume() {
                 >
                   <Download className="h-3.5 w-3.5" /> Download
                 </button>
-                <Link
-                  to="/app/insights"
-                  className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-foreground text-xs font-medium text-background hover:opacity-90"
+                <button
+                  onClick={handleAnalyze}
+                  disabled={isLoading || isAnalysisLoading}
+                  className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-foreground text-xs font-medium text-background hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
                 >
-                  View insights
-                </Link>
+                  <Sparkles className="h-3.5 w-3.5" /> Analyze Resume
+                </button>
               </div>
             </>
           ) : (
