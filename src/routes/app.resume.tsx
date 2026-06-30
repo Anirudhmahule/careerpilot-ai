@@ -9,15 +9,17 @@ export const Route = createFileRoute("/app/resume")({
   component: Resume,
 });
 
-const versions = [
-  { v: "v4", file: "arjun-kumar-frontend.pdf", date: "Mar 04, 2026", score: 78, current: true, notes: "Added 2 projects, TS depth, Vitest" },
-  { v: "v3", file: "arjun-kumar-frontend.pdf", date: "Jan 12, 2026", score: 66, notes: "First post-bootcamp polish" },
-  { v: "v2", file: "arjun-resume-draft.docx", date: "Nov 22, 2025", score: 58 },
-  { v: "v1", file: "resume-original.pdf", date: "Oct 03, 2025", score: 41 },
-];
+/** Format an ISO timestamp into a human-readable date, e.g. "Jun 30, 2026". */
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+}
 
 function Resume() {
-  const { isLoading, error, uploadResume } = useResume();
+  const { isLoading, error, uploadResume, latestResume, resumes } = useResume();
   const { journey } = useJourney();
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -86,32 +88,44 @@ function Resume() {
 
         <aside className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs lg:col-span-5">
           <div className="text-xs font-medium">Current resume</div>
-          <div className="mt-3 flex items-center gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-lg border border-border bg-surface text-primary">
-              <FileText className="h-5 w-5" />
+          {latestResume ? (
+            <>
+              <div className="mt-3 flex items-center gap-3">
+                <div className="grid h-12 w-12 place-items-center rounded-lg border border-border bg-surface text-primary">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium">{latestResume.file_name}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    v{latestResume.version_number} · uploaded {formatDate(latestResume.uploaded_at)}
+                  </div>
+                </div>
+                {/* TODO: replace with real status once AI analysis is implemented */}
+                <span className="rounded-md bg-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">Uploaded</span>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                {/* TODO: replace placeholder values with real analysis scores */}
+                <Mini label="Readiness" value="—" />
+                <Mini label="Skills" value="—" />
+                <Mini label="Gaps" value="—" />
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button disabled title="Coming soon" className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-background text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50">
+                  <Download className="h-3.5 w-3.5" /> Download
+                </button>
+                <Link
+                  to="/app/insights"
+                  className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-foreground text-xs font-medium text-background hover:opacity-90"
+                >
+                  View insights
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="mt-6 text-center text-xs text-muted-foreground">
+              No resume uploaded yet. Upload a PDF to get started.
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-medium">{versions[0].file}</div>
-              <div className="text-[11px] text-muted-foreground">v4 · uploaded {versions[0].date}</div>
-            </div>
-            <span className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success">Analyzed</span>
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-            <Mini label="Readiness" value="78" />
-            <Mini label="Skills" value="42" />
-            <Mini label="Gaps" value="11" />
-          </div>
-          <div className="mt-4 flex gap-2">
-            <button className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-background text-xs hover:bg-accent">
-              <Download className="h-3.5 w-3.5" /> Download
-            </button>
-            <Link
-              to="/app/insights"
-              className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md bg-foreground text-xs font-medium text-background hover:opacity-90"
-            >
-              View insights
-            </Link>
-          </div>
+          )}
         </aside>
 
         <section className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs">
@@ -120,7 +134,7 @@ function Resume() {
               <div className="text-xs font-medium">Version history</div>
               <div className="text-xs text-muted-foreground">All resumes stay private to your workspace.</div>
             </div>
-            <button className="text-xs text-primary hover:underline">Export all</button>
+            <button disabled title="Coming soon" className="text-xs text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-50">Export all</button>
           </div>
           <div className="mt-4 overflow-hidden rounded-lg border border-border">
             <div className="grid grid-cols-12 gap-3 border-b border-border bg-surface px-4 py-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -130,34 +144,43 @@ function Resume() {
               <div className="col-span-2">Readiness</div>
               <div className="col-span-2 text-right">Actions</div>
             </div>
-            {versions.map((v) => (
-              <div key={v.v} className="grid grid-cols-12 items-center gap-3 border-b border-border bg-background px-4 py-3 last:border-b-0 text-sm">
-                <div className="col-span-1">
-                  <span className={
-                    "rounded-md border px-1.5 py-0.5 text-[11px] font-medium " +
-                    (v.current ? "border-primary bg-primary-soft text-primary" : "border-border bg-surface text-muted-foreground")
-                  }>{v.v}</span>
-                </div>
-                <div className="col-span-5 min-w-0">
-                  <div className="truncate font-medium">{v.file}</div>
-                  <div className="truncate text-[11px] text-muted-foreground">{v.notes ?? "—"}</div>
-                </div>
-                <div className="col-span-2 text-xs text-muted-foreground">{v.date}</div>
-                <div className="col-span-2">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 text-xs tabular-nums">{v.score}</span>
-                    <div className="h-1 flex-1 rounded-full bg-border">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${v.score}%` }} />
+            {resumes.length === 0 ? (
+              <div className="px-4 py-8 text-center text-xs text-muted-foreground">
+                No resume versions yet. Upload your first PDF above.
+              </div>
+            ) : (
+              resumes.map((v) => (
+                <div key={v.id} className="grid grid-cols-12 items-center gap-3 border-b border-border bg-background px-4 py-3 last:border-b-0 text-sm">
+                  <div className="col-span-1">
+                    {/* Highlight the latest version */}
+                    <span className={
+                      "rounded-md border px-1.5 py-0.5 text-[11px] font-medium " +
+                      (v.id === latestResume?.id
+                        ? "border-primary bg-primary-soft text-primary"
+                        : "border-border bg-surface text-muted-foreground")
+                    }>v{v.version_number}</span>
+                  </div>
+                  <div className="col-span-5 min-w-0">
+                    <div className="truncate font-medium">{v.file_name}</div>
+                    {/* TODO: add notes field to resume_versions table when AI analysis is implemented */}
+                    <div className="truncate text-[11px] text-muted-foreground">—</div>
+                  </div>
+                  <div className="col-span-2 text-xs text-muted-foreground">{formatDate(v.uploaded_at)}</div>
+                  <div className="col-span-2">
+                    {/* TODO: replace with real readiness score once AI analysis is implemented */}
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 text-xs tabular-nums text-muted-foreground">—</span>
+                      <div className="h-1 flex-1 rounded-full bg-border" />
                     </div>
                   </div>
+                  <div className="col-span-2 flex items-center justify-end gap-1 text-muted-foreground">
+                    <button disabled title="Coming soon" className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"><Download className="h-3.5 w-3.5" /></button>
+                    <button disabled title="Coming soon" className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button disabled title="Coming soon" className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"><MoreHorizontal className="h-3.5 w-3.5" /></button>
+                  </div>
                 </div>
-                <div className="col-span-2 flex items-center justify-end gap-1 text-muted-foreground">
-                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><Download className="h-3.5 w-3.5" /></button>
-                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><Trash2 className="h-3.5 w-3.5" /></button>
-                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><MoreHorizontal className="h-3.5 w-3.5" /></button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
       </div>
