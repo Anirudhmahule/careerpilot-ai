@@ -13,7 +13,7 @@
 An AI-powered career operating system for software engineers. Users upload their resume, define a target role and timeline, and receive a personalized roadmap, skill gap analysis, daily planner, and readiness score. The goal is to help engineers systematically close the gap between where they are and where they want to be.
 
 ### Current Stage
-**Early Alpha — Core Infrastructure Complete, Feature Integration In Progress.**
+**Early Alpha — Core Infrastructure Complete. Resume Management Complete. Beginning AI Analysis Pipeline.**
 Authentication, journeys, and the resume data layer are fully implemented. All other feature pages currently show mock/hardcoded data and are not connected to the backend.
 
 ### Tech Stack
@@ -107,47 +107,24 @@ Supabase Database / Storage / Auth
 ## 2. Current Sprint
 
 ### Current Sprint
-**Sprint 1 — Core Data Layer**
+**Sprint 3 — AI Analysis Pipeline**
 
 ### Current Goal
-Build a solid, production-grade data layer before touching any UI integration.
-
-### Completed Tasks
-- [x] Authentication service (`authService`)
-- [x] `AuthProvider` context
-- [x] `useAuth`, `useCurrentUser`, `useSession` hooks
-- [x] Route guards: `beforeLoad`, `ProtectedRoute`, `OnboardingGate`
-- [x] Journey CRUD service (`journeyService`)
-- [x] `useJourney` hook with full CRUD
-- [x] `JourneyWizardPage` — multi-step form with Zod + RHF
-- [x] Resume metadata service (`resumeService`)
-- [x] Resume file storage service (`storageService`) with PDF validation + sanitized filenames
-- [x] `useResume` hook with upload rollback, optimistic local state update, and delete coordination
-- [x] `docs/PROJECT_CONTEXT.md` — living developer documentation
-- [x] `docs/AI_CONTEXT.md` — this document
-- [x] Resume page UI connected to `useResume()` — upload wired, real data rendered, empty states added
-- [x] Upload card disabled with visual feedback during upload (`isLoading`)
-- [x] Upload description corrected to PDF-only
-- [x] Upload error surfaced below drop zone
-- [x] `formatDate()` helper for `uploaded_at` ISO timestamps
-- [x] Unimplemented buttons (Download, Trash, Export all) marked `disabled` with `title="Coming soon"`
+Build the analysis domain and AI pipeline that powers CareerPilot.
 
 ### Current Task
-Connecting the Dashboard page (`/app/dashboard`) to `useJourney()` and `useResume()` for live data.
+Implement the Analysis feature foundation.
 
 ### Next Task
-Implement delete resume flow — wire Trash buttons to `deleteResume(version.id, version.storage_path)` in `useResume()`.
+Create analysis snapshots and AI workflow.
 
 ### Blocked Tasks
-- AI analysis pipeline: **Blocked** — no backend function/edge function written yet.
-- Insights page data: **Blocked** — depends on AI analysis output.
+None.
 
 ### Future Sprints
-- Sprint 2: Connect Resume page + Dashboard to live data
-- Sprint 3: AI analysis pipeline (edge function / Supabase function)
-- Sprint 4: Insights, Compare, Suggestions pages wired to real analysis data
+- Sprint 4: Analysis-Derived Pages (Insights, Suggestions, Compare) and Dashboard integration
 - Sprint 5: Roadmap + Planner live data
-- Sprint 6: Profile editing, notification preferences
+- Sprint 6: Profile & Settings
 - Sprint 7: Polish, error states, empty states, loading skeletons
 
 ---
@@ -156,12 +133,13 @@ Implement delete resume flow — wire Trash buttons to `deleteResume(version.id,
 
 | Area | Completion | Notes |
 | :--- | :--- | :--- |
-| **Overall** | **~28%** | Resume page fully wired; Dashboard next |
+| **Overall** | **~45%** | Core domains working, resume flows fully live, transitioning to AI analysis |
 | Authentication | 100% | Full service + provider + guards + forms |
 | Journey | 100% | Full CRUD service + hook + wizard page |
 | Resume (backend) | 100% | Storage + DB service + hook complete |
-| Resume (UI integration) | 90% | Upload ✅ · Live list ✅ · Delete ❌ · Download ❌ |
-| Dashboard | 10% | UI shell exists; all data is hardcoded |
+| Resume (UI integration) | 100% | Upload ✅ · Live list ✅ · Delete ✅ · Download ✅ |
+| Dashboard | 40% | Greeting, role label, roadmap subtitle live; stat cards require analysis pipeline |
+| AppShell | 90% | Sidebar Recent + topbar breadcrumb + resume picker all live |
 | AI Analysis Pipeline | 0% | Not implemented |
 | Insights | 5% | UI-only mock |
 | Compare | 5% | UI-only mock |
@@ -169,7 +147,7 @@ Implement delete resume flow — wire Trash buttons to `deleteResume(version.id,
 | Analysis (loading page) | 5% | UI-only mock |
 | Roadmap | 5% | UI-only mock |
 | Planner | 5% | UI-only mock |
-| Profile | 20% | UI exists; email/initials from `useAuth`, rest mocked |
+| Profile | 20% | UI exists; email/initials from `useAuth` in AppShell |
 
 ---
 
@@ -210,44 +188,44 @@ Implement delete resume flow — wire Trash buttons to `deleteResume(version.id,
 | **DB Tables** | `journeys` |
 | **Storage Buckets** | None |
 | **Integration** | ✅ Fully integrated at `/app/journey/create` |
-| **Missing Pieces** | Editing existing journey from Profile page, multiple journeys |
-| **Next Steps** | Wire journey data into Dashboard header |
+| **Missing Pieces** | Editing existing journey from Profile page; multiple journeys per user |
+| **Next Steps** | Support multiple journeys per user; wire to profile page in Sprint 5 |
 
 ---
 
 ### Resume Feature
 | Item | Value |
 | :--- | :--- |
-| **Status** | 🟡 UI Integrated — delete + download pending |
-| **Purpose** | Upload PDF resumes, version-track them, display history |
+| **Status** | ✅ UI Fully Integrated |
+| **Purpose** | Upload PDF resumes, version-track them, display history, download via signed URL |
 | **Folder** | `src/features/resume/` |
 | **Pages** | **EMPTY** — page is rendered directly from the route file |
 | **Components** | **EMPTY** — no dedicated components; `Mini` stat card is inline in the route file |
-| **Hooks** | `useResume()` — upload, delete, load latest, load all, refresh |
+| **Hooks** | `useResume()` — upload, delete, load latest, load all, refresh, getDownloadUrl |
 | **Services** | `resumeService` (uploadResume, getLatestResumeByUserId, getAllResumesByUserId, deleteResume), `storageService` (uploadResumeFile, deleteResumeFile, getSignedResumeUrl) |
 | **Types** | ResumeVersion, CreateResumeRequest |
 | **Context Provider** | None |
 | **DB Tables** | `resume_versions` |
 | **Storage Buckets** | `resume-files` |
-| **Integration** | ✅ Upload wired · ✅ `resumes` list rendered · ✅ `latestResume` sidebar · ✅ Empty states · ❌ Delete not wired · ❌ Download not wired |
-| **Missing Pieces** | Wire Trash buttons to `deleteResume(version.id, version.storage_path)`, implement signed URL download via `getSignedResumeUrl()` |
-| **Next Steps** | 1. Wire delete flow · 2. Wire download via signed URL · 3. Connect resume data to Dashboard |
+| **Integration** | ✅ Upload wired · ✅ Live list rendered · ✅ `latestResume` sidebar · ✅ Empty states · ✅ Delete wired · ✅ Download via signed URL |
+| **Missing Pieces** | Export all (deferred) · Readiness score (blocked — needs AI analysis) · Notes column (blocked — needs DB field) |
+| **Next Steps** | All primary flows complete. Resume feature ready for Sprint 3 AI integration. |
 
 ---
 
 ### Dashboard Feature
 | Item | Value |
 | :--- | :--- |
-| **Status** | 🔴 Mock Data Only |
+| **Status** | 🟡 Partially Integrated |
 | **Purpose** | Overview of career readiness: score, skill gaps, roadmap progress, daily tasks |
 | **Folder** | `src/features/dashboard/` — **EMPTY** |
 | **Pages** | Inline in `src/routes/app.dashboard.tsx` |
-| **Components** | StatCard, QuickAction, PriorityChip, Legend, TrendChart — all inline, all hardcoded |
-| **Hooks** | None connected |
-| **Services** | None |
+| **Components** | StatCard, QuickAction, PriorityChip, Legend, TrendChart — all inline |
+| **Hooks** | `useAuth()`, `useJourney()`, `useResume()` — connected |
+| **Services** | None directly |
 | **DB Tables** | None used yet |
-| **Integration** | ❌ All data hardcoded in JSX |
-| **Next Steps** | Integrate `useJourney()` for role/timeline display, `useResume()` for version display |
+| **Integration** | ✅ Greeting personalized from `useAuth().user.email` · ✅ Readiness Trend subtitle shows `journey.target_role` · ✅ Roadmap Progress subtitle shows `journey.timeline_months` + `daily_study_hours` · ❌ Stat card values still mock · ❌ Today task list still mock |
+| **Next Steps** | Connect to Sprint 3 AI pipeline outputs (readiness score, active gaps, skill count) |
 
 ---
 
@@ -334,11 +312,12 @@ Implement delete resume flow — wire Trash buttons to `deleteResume(version.id,
 | Item | Status |
 | :--- | :--- |
 | UI | ✅ |
-| Logic | ❌ |
-| API | ❌ |
-| Mock Data | YES — all stat values, chart data, task list hardcoded in JSX |
+| Logic | 🟡 Partial |
+| API | 🟡 Partial |
+| Mock Data | PARTIAL — stat values, chart data, task list still mock; greeting/role/timeline are live |
 | Components Used | PageHeader, StatCard, TrendChart, QuickAction, PriorityChip, Legend (all inline) |
-| Missing | `useJourney()` for role display, `useResume()` for resume version display, readiness score from AI analysis |
+| Wired | Greeting from `useAuth().user.email` · Readiness Trend subtitle from `journey.target_role` · Roadmap Progress subtitle from `journey.timeline_months` + `daily_study_hours` |
+| NOT Wired | Stat card values · Today task list · Top skill gaps · Readiness trend chart data (all require AI analysis) |
 
 ---
 
@@ -370,12 +349,12 @@ Implement delete resume flow — wire Trash buttons to `deleteResume(version.id,
 | Item | Status |
 | :--- | :--- |
 | UI | ✅ |
-| Logic | ✅ Upload + live data rendering |
-| API | ✅ Upload → Supabase Storage + DB |
+| Logic | ✅ |
+| API | ✅ |
 | Mock Data | NO — all mock data removed |
 | Components Used | PageHeader, Mini (inline); `useResume()`, `useJourney()` |
-| Wired | Upload (PDF only, disabled while loading) · `latestResume` sidebar · `resumes` version table · `formatDate()` for dates · Empty states |
-| NOT Wired | Delete (Trash buttons disabled, `title="Coming soon"`) · Download (disabled) · Export all (disabled) · Readiness score (TODO — needs AI analysis) · Notes column (TODO — needs DB field) |
+| Wired | Upload (PDF only, disabled while loading) · `latestResume` sidebar · `resumes` version table · `formatDate()` for dates · Empty states · Delete (Trash buttons call `deleteResume`) · Download (opens signed URL in new tab) |
+| NOT Wired | Export all (deferred) · Readiness score (needs AI analysis) · Notes column (needs DB field) |
 
 ---
 
@@ -556,7 +535,7 @@ Implement delete resume flow — wire Trash buttons to `deleteResume(version.id,
 - `useCurrentUser()` — returns `AuthUser | null`
 - `useSession()` — returns `AuthSession | null`
 - `useJourney()` — journey, isLoading, error, createJourney, updateJourney, deleteJourney, refreshJourney
-- `useResume()` — latestResume, resumes, isLoading, error, uploadResume, deleteResume, refreshResumes
+- `useResume()` — latestResume, resumes, isLoading, error, uploadResume, deleteResume, refreshResumes, getDownloadUrl
 
 ### Reusable Services
 - `authService` — `signIn`, `signUp`, `signOut`, `getCurrentUser`, `getSession`, `subscribeToAuthChanges`
@@ -589,22 +568,25 @@ Button, Card, CardHeader, CardContent, CardTitle, CardDescription, Dialog, Input
 Fixed left sidebar (hidden on mobile). Contains:
 - CareerPilot AI brand logo
 - Navigation links: Dashboard, Journey, Resume, Insights, Roadmap, Planner, Profile
-- "Recent" section with 3 hardcoded journey names
+- "Recent" section: shows active `journey.target_role` (live); falls back to 3 mock names if no journey
 - "Free plan" usage card with upgrade button
 - Settings link (non-functional) + Sign out button (functional)
 
 ### Topbar (AppShell)
 Sticky. Contains:
 - Mobile hamburger button (non-functional)
-- Breadcrumb showing current section name
+- Breadcrumb: shows `journey.target_role` (live, falls back to "Senior Frontend Eng." if no journey) + current page name
 - Search input (non-functional)
-- Resume version picker (non-functional — shows "Resume v4" text)
+- Resume version picker: shows `Resume vN` using `latestResume.version_number` (live); shows "No resume" if none
 - Dark mode toggle button (non-functional)
 - Notifications bell (non-functional)
 - User avatar/initials (derived from `useAuth().user.email`)
 
 ### Dashboard (`/app/dashboard`)
-- 4 stat cards: Readiness 78/100, Skills 42/56, Roadmap 63%, Active Gaps 11 — **all mock**
+- Greeting: `"Welcome back, {name}"` — name derived from `useAuth().user.email` prefix (live)
+- Readiness Trend subtitle: shows `journey.target_role` (live)
+- Roadmap Progress subtitle: shows `journey.timeline_months` + `daily_study_hours` (live)
+- 4 stat cards: Readiness 78/100, Skills 42/56, Roadmap 63%, Active Gaps 11 — **still mock**
 - Readiness trend SVG chart — **mock data**
 - "Today" task list — **mock data**
 - Roadmap progress bars — **mock data**
@@ -612,9 +594,9 @@ Sticky. Contains:
 - Quick actions (links to Resume, Insights, Roadmap, Compare)
 
 ### Resume Page (`/app/resume`)
-- Upload zone (drag-and-drop UI, file input non-functional)
-- Current resume card showing v4 stats — **mock**
-- Version history table (4 rows) — **mock**
+- Upload zone: functional PDF upload, disabled while loading
+- Current resume sidebar: live data from `latestResume`, Download button opens signed URL in new tab
+- Version history table: live from `resumes`, Download + Delete buttons fully wired, empty state when no resumes
 
 ### Journey Page (`/app/journey`)
 - 5-step wizard UI (local state only, no persistence)
@@ -980,7 +962,10 @@ function normalizeResumeError(err: unknown): ResumeServiceError {
 ### Known Issues
 1. **Non-transactional delete in `useResume.deleteResume()`**: Storage is deleted first; if DB delete then fails, the metadata row in `resume_versions` becomes orphaned with no corresponding file. Needs background cleanup or server-side transaction.
 
-2. **`OnboardingGate` has a `console.log`**: The gate currently logs `[OnboardingGate]` state on every render — this should be removed before production.
+2. **Debug `console.log` statements not yet removed (pre-production cleanup needed)**:
+   - `src/features/journey/components/OnboardingGate.tsx` — logs full gate state on every render
+   - `src/features/journey/hooks/useJourney.ts` — 5 `console.log` calls logging load/result/setJourney
+   - `src/features/journey/pages/JourneyWizardPage.tsx` — 3 `console.log` calls logging navigation steps
 
 3. **`/app/journey` route is a duplicate/preview**: The route `app.journey.tsx` contains a non-functional local-state only wizard that duplicates the real wizard at `app.journey_.create.tsx`. The intent of this route is unclear.
 
@@ -988,71 +973,67 @@ function normalizeResumeError(err: unknown): ResumeServiceError {
 | File | Mock Data |
 | :--- | :--- |
 | `src/routes/app.dashboard.tsx` | All stat values, chart series, task list, skill gaps |
-| ~~`src/routes/app.resume.tsx`~~ | ~~`const versions = [...]`~~ — **Removed. Now uses live `useResume()` data.** |
+| ~~`src/routes/app.resume.tsx`~~ | ~~All resume versions~~ — **Removed. Now uses live `useResume()` data.** |
 | `src/routes/app.insights.tsx` | All scores, skill breakdowns, gap list |
 | `src/routes/app.compare.tsx` | Version pair, diff data |
 | `src/routes/app.suggestions.tsx` | All suggestion groups |
 | `src/routes/app.analysis.tsx` | Pipeline stages, timer |
 | `src/routes/app.planner.tsx` | Calendar events, Kanban tasks |
 | `src/routes/app.roadmap.tsx` | Sprint/module/task data |
-| `src/routes/app.profile.tsx` | User name, email, GitHub, stats |
+| `src/routes/app.profile.tsx` | User name ("Arjun Kumar"), email, GitHub, stats — all hardcoded |
 
 ### TODOs Found in Code
-- `storageService.ts`: No TODOs
-- `useResume.ts`: TODO comment in `deleteResume` about non-atomic delete
-- `OnboardingGate.tsx`: Debug `console.log` present
+- `useResume.ts`: TODO comment in `deleteResume` about non-atomic storage+DB delete
+- `OnboardingGate.tsx`: Debug `console.log` on every render — remove before production
+- `useJourney.ts`: 5 debug `console.log` statements — remove before production
+- `JourneyWizardPage.tsx`: 3 debug `console.log` statements in submit handler — remove before production
 - `app.resume.tsx`: TODO — readiness score placeholder (needs AI analysis) · TODO — notes column (needs `notes` field in `resume_versions`)
 
 ### Limitations
 - No password reset flow implemented
 - No OAuth (Google, GitHub) implemented
-- Resume upload validates PDF type but MIME type can be spoofed — server-side validation recommended
+- Resume upload validates PDF MIME type client-side only — server-side validation recommended
 - Signed URL expiry is 1 hour (hardcoded) — no refresh mechanism
 
 ---
 
 ## 18. Roadmap
 
-### Immediate Next Tasks (Sprint 2 — in progress)
-1. ~~**Connect Resume Page UI** to `useResume()` hook~~ ✅ **DONE**
-   - ~~Wire `<input type="file">` to `uploadResume(file, journeyId)`~~ ✅
-   - ~~Render `resumes` array in the version history table~~ ✅
-   - ~~Display `latestResume` in the "Current resume" sidebar panel~~ ✅
-   - Wire Trash buttons to `deleteResume(resumeId, storagePath)` ← **NEXT**
-   - Wire Download buttons via `storageService.getSignedResumeUrl(storagePath)`
+### Completed (Sprint 1 & Sprint 2)
+- ✅ Resume page UI wired — upload, live list, empty states
+- ✅ Delete wired — Trash buttons call `deleteResume(resumeId, storagePath)`
+- ✅ Download wired — Download buttons call `getDownloadUrl()` → signed URL → opens in new tab
+- ✅ Dashboard page partially connected — greeting, role label, roadmap subtitle live
+- ✅ AppShell sidebar and topbar connected — Recent list, breadcrumb, resume picker all live
 
-2. **Connect Dashboard Page** to live data
-   - Replace hardcoded role name with `useJourney().journey.target_role`
-   - Replace hardcoded resume version with `useResume().latestResume`
-   - Add empty states when journey or resume is null
-
-### Sprint 3 — AI Analysis Pipeline
-3. Create a Supabase Edge Function or backend endpoint to analyze resume text
-4. Create an `analyses` or `analysis_results` database table to store AI output
-5. Create `analysisService` + `useAnalysis` hook
-6. Wire `/app/analysis` to show real pipeline progress
+### Sprint 3 — AI Analysis Pipeline (in progress)
+1. **Implement Analysis feature foundation**
+2. **Create Supabase Edge Function** or backend endpoint to parse and analyze resume text
+3. **Design database tables** for analysis results and snapshots
+4. **Wire `/app/analysis`** to reflect actual parsing progress
 
 ### Sprint 4 — Analysis-Derived Pages
-7. Connect `/app/insights` to real analysis data
-8. Connect `/app/suggestions` to real AI recommendations
-9. Connect `/app/compare` to real diff logic
+5. **Insights**: Connect `/app/insights` to real analysis data
+6. **Suggestions**: Connect `/app/suggestions` to real AI recommendations
+7. **Compare**: Connect `/app/compare` to real diff logic
+8. **Dashboard Integration**: Wire Dashboard stat cards (readiness, skills, gaps) to analysis output
 
 ### Sprint 5 — Roadmap & Planner
-10. Design `roadmap_sprints`, `roadmap_modules`, `tasks` DB tables
-11. Create roadmap service + hook
-12. Wire `/app/roadmap` to real sprint data
-13. Wire `/app/planner` to real task data
+9. Design `roadmap_sprints`, `roadmap_modules`, `tasks` DB tables
+10. Create roadmap service + hook
+11. Wire `/app/roadmap` to real sprint data
+12. Wire `/app/planner` to real task data
 
 ### Sprint 6 — Profile & Settings
-14. Wire `/app/profile` form fields to Supabase user metadata updates
-15. Wire journey section to `useJourney()`
-16. Implement password change flow
+13. Wire `/app/profile` form fields to Supabase user metadata updates
+14. Wire profile journey section to `useJourney()`
+15. Implement password change flow
 
 ### Sprint 7 — Polish
-17. Add loading skeleton states to all pages
-18. Add error boundary and fallback UI
-19. Remove `console.log` from `OnboardingGate`
-20. Remove mock data from all remaining route files
+16. Add loading skeleton states to all pages
+17. Add error boundary and fallback UI
+18. Remove all debug `console.log` statements (`OnboardingGate`, `useJourney`, `JourneyWizardPage`)
+19. Remove mock data from all remaining route files
 
 ---
 
@@ -1061,58 +1042,71 @@ function normalizeResumeError(err: unknown): ResumeServiceError {
 > **This is the essential context for any AI starting work on this project.**
 
 ```
-CURRENT STATE:
-=============
+CURRENT STATE (as of Sprint 2 — UI Integration):
+=================================================
+
 ✅ Authentication: 100% complete
    - authService, AuthProvider, useAuth, ProtectedRoute, LoginForm, SignupForm all work
+   - Sessions persist via Supabase localStorage JWT
+   - normalizeAuthError fixed (TS2352 double-cast resolved)
 
 ✅ Journey: 100% complete
-   - journeyService, useJourney, JourneyWizardPage, OnboardingGate all work
+   - journeyService, useJourney (create/update/delete/refresh), JourneyWizardPage, OnboardingGate all work
+   - journey.target_role, journey.timeline_months, journey.daily_study_hours, journey.experience_level available
+   - WARNING: useJourney.ts has 5 debug console.logs; JourneyWizardPage.tsx has 3 — remove before production
 
 ✅ Resume Data Layer: 100% complete
-   - storageService: validates PDF, sanitizes filename, uploads, deletes, generates signed URLs
+   - storageService: validates PDF, sanitizes filename, uploads, deletes, generates signed URLs (1h expiry)
    - resumeService: inserts/reads/deletes resume_versions rows
-   - useResume: upload (with DB rollback on failure), delete, load latest, load all
+   - useResume API: uploadResume, deleteResume, getDownloadUrl, refreshResumes, latestResume, resumes, isLoading, error
 
-✅ Resume Page UI: INTEGRATED (upload + live data)
+✅ Resume Page UI: FULLY INTEGRATED
    - File: src/routes/app.resume.tsx
-   - useResume() and useJourney() are imported and initialized
    - Upload: <input accept="application/pdf"> → handleFileChange → uploadResume(file, journey.id)
-   - Upload card disabled (pointer-events-none, opacity-60) while isLoading
-   - Upload error rendered below drop zone from useResume().error
+   - Upload card disabled (pointer-events-none, opacity-60) while isLoading; error shown below drop zone
    - Current resume aside: shows latestResume.file_name, version_number, formatted uploaded_at
-   - Empty state rendered when latestResume is null
-   - Version table: resumes.map() using real DB fields (id, file_name, version_number, uploaded_at)
-   - Latest version highlighted by comparing v.id === latestResume?.id
-   - Empty state rendered when resumes.length === 0
-   - formatDate() helper converts ISO timestamps to "Jun 30, 2026" format
-   - Readiness score: shows "—" placeholder (TODO: needs AI analysis)
-   - Notes column: shows "—" (TODO: needs notes field in resume_versions table)
-   - Delete/Download/Export buttons: disabled + title="Coming soon"
+   - Download button: calls getDownloadUrl(latestResume.storage_path) → window.open(url, '_blank')
+   - Version table: resumes.map() using real DB fields; latest version highlighted
+   - Delete button: calls deleteResume(v.id, v.storage_path); disabled while isLoading
+   - Download button per row: calls getDownloadUrl(v.storage_path) → window.open(url, '_blank')
+   - Empty states rendered when latestResume is null or resumes.length === 0
+   - Readiness score: shows "—" placeholder (blocked — needs AI analysis)
+   - Notes column: shows "—" (blocked — needs notes field in resume_versions table)
 
-❌ Dashboard: NOT integrated
-   - Full UI exists at /app/dashboard
-   - All stats, chart data, task list hardcoded
+✅ AppShell: Live data in sidebar and topbar
+   - File: src/components/app-shell.tsx
+   - Imports: useAuth(), useJourney(), useResume()
+   - Sidebar Recent section: shows journey.target_role if journey exists; falls back to 3 mock names
+   - Topbar breadcrumb: shows journey.target_role (or fallback) + current page label
+   - Topbar Resume picker: shows "Resume v{latestResume.version_number}" or "No resume"
+   - User avatar: shows initials from user.email.slice(0,2).toUpperCase()
+   - WARNING: OnboardingGate.tsx has a console.log on every render — remove before production
+
+🟡 Dashboard: Partially integrated
+   - File: src/routes/app.dashboard.tsx
+   - Imports: useAuth(), useJourney(), useResume()
+   - Greeting: "Welcome back, {capitalizedEmailPrefix}" (live)
+   - Readiness Trend subtitle: journey.target_role (live, fallback to "Senior Frontend Eng.")
+   - Roadmap Progress subtitle: "{timeline_months} months · {daily_study_hours}h / day" (live)
+   - 4 stat cards, Today task list, chart data, skill gaps — ALL STILL MOCK (require AI analysis)
+
+❌ Profile page: ALL MOCK
+   - File: src/routes/app.profile.tsx
+   - No hooks imported — all fields hardcoded to "Arjun Kumar", "arjun.k@gmail.com", "github.com/arjun-k"
+   - Journey section hardcoded to "Senior Frontend Engineer", "3 months", etc.
+   - Stats (Journeys: 3, Resumes: 4, Readiness: 78) all hardcoded
 
 ❌ All other pages: Mock Data Only
-   - /app/insights, /app/suggestions, /app/compare, /app/analysis, /app/planner, /app/roadmap, /app/profile
+   - /app/insights, /app/suggestions, /app/compare, /app/analysis, /app/planner, /app/roadmap
 
 NEXT RECOMMENDED TASK:
-=====================
-1. Wire delete resume flow in src/routes/app.resume.tsx:
-   - Change Trash buttons from disabled to active
-   - onClick: () => deleteResume(v.id, v.storage_path)
-   - deleteResume() already exists in useResume() — no service changes needed
-   - Destructure deleteResume from useResume() (it is already exported by the hook)
-
-2. Wire download:
-   - onClick: async () => { const { data } = await storageService.getSignedResumeUrl(v.storage_path); window.open(data, '_blank'); }
-   - storageService must be imported directly for this one-off use
+======================
+Begin Sprint 3 (AI Analysis Pipeline):
+1. Plan the DB structure for analysis results. We need to save extracted skills, gaps, raw recommendations, and a consolidated readiness score.
+2. Design the Supabase Edge Function invocation flow inside a new service (e.g. `analysisService`).
 
 DO NOT:
 =======
-- Call supabase directly from the route component
-- Create a new hook — useResume() already has deleteResume()
-- Create a new service — storageService.getSignedResumeUrl() already exists
-- Rebuild any UI — only wire the existing disabled buttons
+- Work on `/app/profile` or settings until Sprint 6.
+- Call Supabase directly or bypass services when building the analysis flows.
 ```
