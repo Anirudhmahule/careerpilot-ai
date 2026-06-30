@@ -44,7 +44,7 @@ export function normalizeAuthError(err: unknown): AuthServiceError {
         const supaError = err as SupabaseAuthError;
         return {
             message: supaError.message,
-            code: 'code' in supaError ? String((supaError as Record<string, unknown>).code) : undefined,
+            code: 'code' in supaError ? String((supaError as unknown as Record<string, unknown>).code) : undefined,
         };
     }
     if (err instanceof Error) {

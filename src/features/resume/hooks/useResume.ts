@@ -40,6 +40,8 @@ export interface UseResumeReturn {
     deleteResume(resumeId: string, storagePath: string): Promise<ResumeHookError | null>;
     /** Manually re-fetch all resume versions from the database. */
     refreshResumes(): Promise<void>;
+    /** Generate a short-lived download URL for a resume file. */
+    getDownloadUrl(storagePath: string): Promise<string | null>;
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -72,6 +74,8 @@ export function useResume(): UseResumeReturn {
             resumeService.getLatestResumeByUserId(userId),
             resumeService.getAllResumesByUserId(userId),
         ]);
+
+        if (!mountedRef.current) return;
 
         if (latestResult.error) {
             setError(latestResult.error);
@@ -161,6 +165,11 @@ export function useResume(): UseResumeReturn {
 
     const deleteResume = useCallback(
         async (resumeId: string, storagePath: string): Promise<ResumeHookError | null> => {
+            if (!user) {
+                return {
+                    message: "You must be signed in to delete a resume.",
+                };
+            }
             setIsLoading(true);
             setError(null);
 
@@ -176,10 +185,11 @@ export function useResume(): UseResumeReturn {
             }
 
             // Step 2: Only remove the DB record once storage deletion succeeds.
-            // TODO: This two-step delete is not atomic. If the DB delete fails
-            // after a successful storage delete, the file is permanently gone but
-            // the metadata row remains. A future improvement should add a background
-            // cleanup job or a server-side transaction to handle this case.
+            // TODO:
+            // Storage deletion and database deletion are performed separately.
+            // If the database delete fails after storage succeeds, the metadata row
+            // becomes orphaned. Consider moving deletion into a server-side endpoint
+            // or Supabase Edge Function so both operations can be coordinated.
             const { error: dbError } = await resumeService.deleteResume(resumeId);
 
             if (!mountedRef.current) return null;
@@ -190,19 +200,33 @@ export function useResume(): UseResumeReturn {
                 return dbError;
             }
 
-            // Step 3: Refresh local state.
-            setResumes((prev) => prev.filter((r) => r.id !== resumeId));
-            setLatestResume((prev) => (prev?.id === resumeId ? null : prev));
-            setIsLoading(false);
+            // Step 3: Reload from the database so latestResume always reflects
+            // the true newest remaining version — not a client-side guess.
+            // This also picks up any server-side side-effects (e.g. version
+            // renumbering triggers) without duplicating state logic here.
+            await loadResumes(user.id);
             return null;
         },
-        [],
+        [user, loadResumes],
     );
 
     const refreshResumes = useCallback(async (): Promise<void> => {
         if (!user) return;
         await loadResumes(user.id);
     }, [user, loadResumes]);
+
+    const getDownloadUrl = useCallback(
+        async (storagePath: string): Promise<string | null> => {
+            setError(null);
+            const { data, error: storageError } = await storageService.getSignedResumeUrl(storagePath);
+            if (storageError) {
+                setError(storageError);
+                return null;
+            }
+            return data;
+        },
+        [],
+    );
 
     // ─── Return ──────────────────────────────────────────────────────────────────
 
@@ -214,5 +238,6 @@ export function useResume(): UseResumeReturn {
         uploadResume,
         deleteResume,
         refreshResumes,
+        getDownloadUrl,
     };
 }

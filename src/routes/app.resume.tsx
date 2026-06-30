@@ -10,7 +10,9 @@ export const Route = createFileRoute("/app/resume")({
 });
 
 /** Format an ISO timestamp into a human-readable date, e.g. "Jun 30, 2026". */
-function formatDate(iso: string): string {
+function formatDate(iso?: string): string {
+  if (!iso) return "—";
+
   return new Date(iso).toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
@@ -19,7 +21,7 @@ function formatDate(iso: string): string {
 }
 
 function Resume() {
-  const { isLoading, error, uploadResume, latestResume, resumes } = useResume();
+  const { isLoading, error, uploadResume, latestResume, resumes, deleteResume, getDownloadUrl } = useResume();
   const { journey } = useJourney();
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -28,6 +30,13 @@ function Resume() {
     e.target.value = "";
     if (!file || !journey) return;
     await uploadResume(file, journey.id);
+  }
+
+  async function handleDownload(storagePath: string) {
+    const url = await getDownloadUrl(storagePath);
+    if (url) {
+      window.open(url, "_blank");
+    }
   }
 
   return (
@@ -110,7 +119,10 @@ function Resume() {
                 <Mini label="Gaps" value="—" />
               </div>
               <div className="mt-4 flex gap-2">
-                <button disabled title="Coming soon" className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-background text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50">
+                <button
+                  onClick={() => void handleDownload(latestResume.storage_path)}
+                  className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-border bg-background text-xs hover:bg-accent"
+                >
                   <Download className="h-3.5 w-3.5" /> Download
                 </button>
                 <Link
@@ -134,7 +146,7 @@ function Resume() {
               <div className="text-xs font-medium">Version history</div>
               <div className="text-xs text-muted-foreground">All resumes stay private to your workspace.</div>
             </div>
-            <button disabled title="Coming soon" className="text-xs text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-50">Export all</button>
+            <button className="text-xs text-primary hover:underline">Export all</button>
           </div>
           <div className="mt-4 overflow-hidden rounded-lg border border-border">
             <div className="grid grid-cols-12 gap-3 border-b border-border bg-surface px-4 py-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -174,9 +186,20 @@ function Resume() {
                     </div>
                   </div>
                   <div className="col-span-2 flex items-center justify-end gap-1 text-muted-foreground">
-                    <button disabled title="Coming soon" className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"><Download className="h-3.5 w-3.5" /></button>
-                    <button disabled title="Coming soon" className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /></button>
-                    <button disabled title="Coming soon" className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"><MoreHorizontal className="h-3.5 w-3.5" /></button>
+                    <button
+                      onClick={() => void handleDownload(v.storage_path)}
+                      className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => void deleteResume(v.id, v.storage_path)}
+                      disabled={isLoading}
+                      className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><MoreHorizontal className="h-3.5 w-3.5" /></button>
                   </div>
                 </div>
               ))

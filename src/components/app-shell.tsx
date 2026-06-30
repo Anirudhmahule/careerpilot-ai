@@ -20,6 +20,8 @@ import {
 import { useAuth } from "@/features/auth";
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 import { OnboardingGate } from "@/features/journey/components/OnboardingGate";
+import { useJourney } from "@/features/journey/hooks/useJourney";
+import { useResume } from "@/features/resume/hooks/useResume";
 
 const nav = [
   { to: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -35,6 +37,8 @@ export function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+  const { journey } = useJourney();
+  const { latestResume } = useResume();
 
   async function handleSignOut() {
     await signOut();
@@ -94,19 +98,28 @@ export function AppShell() {
             Recent
           </p>
           <ul className="space-y-0.5 text-sm">
-            {["Senior Frontend Eng.", "React Specialist", "Full-stack Pivot"].map((j, i) => (
-              <li key={j}>
+            {journey ? (
+              <li key={journey.id}>
                 <button className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-muted-foreground hover:bg-accent hover:text-foreground">
-                  <span
-                    className={
-                      "h-1.5 w-1.5 shrink-0 rounded-full " +
-                      (i === 0 ? "bg-primary" : i === 1 ? "bg-success" : "bg-warning")
-                    }
-                  />
-                  <span className="truncate">{j}</span>
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                  <span className="truncate">{journey.target_role}</span>
                 </button>
               </li>
-            ))}
+            ) : (
+              ["Senior Frontend Eng.", "React Specialist", "Full-stack Pivot"].map((j, i) => (
+                <li key={j}>
+                  <button className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-muted-foreground hover:bg-accent hover:text-foreground">
+                    <span
+                      className={
+                        "h-1.5 w-1.5 shrink-0 rounded-full " +
+                        (i === 0 ? "bg-primary" : i === 1 ? "bg-success" : "bg-warning")
+                      }
+                    />
+                    <span className="truncate">{j}</span>
+                  </button>
+                </li>
+              ))
+            )}
           </ul>
         </nav>
 
@@ -151,7 +164,7 @@ export function AppShell() {
               <Command className="h-4 w-4" />
             </button>
             <div className="hidden min-w-0 items-center gap-1.5 text-sm text-muted-foreground md:flex">
-              <span className="truncate">Senior Frontend Eng.</span>
+              <span className="truncate">{journey?.target_role || "Senior Frontend Eng."}</span>
               <span>/</span>
               <span className="truncate text-foreground">
                 {nav.find((n) => pathname.startsWith(n.to))?.label ?? "Workspace"}
@@ -172,7 +185,7 @@ export function AppShell() {
           <div className="flex items-center gap-1.5">
             <button className="hidden items-center gap-1.5 rounded-md border border-border bg-surface px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground md:inline-flex">
               <SlidersHorizontal className="h-3.5 w-3.5" />
-              Resume v4
+              {latestResume ? `Resume v${latestResume.version_number}` : "No resume"}
               <ChevronDown className="h-3 w-3" />
             </button>
             <button className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground">

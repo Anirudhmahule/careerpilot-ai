@@ -125,12 +125,18 @@ Build a solid, production-grade data layer before touching any UI integration.
 - [x] `useResume` hook with upload rollback, optimistic local state update, and delete coordination
 - [x] `docs/PROJECT_CONTEXT.md` — living developer documentation
 - [x] `docs/AI_CONTEXT.md` — this document
+- [x] Resume page UI connected to `useResume()` — upload wired, real data rendered, empty states added
+- [x] Upload card disabled with visual feedback during upload (`isLoading`)
+- [x] Upload description corrected to PDF-only
+- [x] Upload error surfaced below drop zone
+- [x] `formatDate()` helper for `uploaded_at` ISO timestamps
+- [x] Unimplemented buttons (Download, Trash, Export all) marked `disabled` with `title="Coming soon"`
 
 ### Current Task
-Connecting the Resume page UI (`/app/resume`) to `useResume()`.
+Connecting the Dashboard page (`/app/dashboard`) to `useJourney()` and `useResume()` for live data.
 
 ### Next Task
-Connect the Dashboard page (`/app/dashboard`) to `useJourney()` and `useResume()` for live data.
+Implement delete resume flow — wire Trash buttons to `deleteResume(version.id, version.storage_path)` in `useResume()`.
 
 ### Blocked Tasks
 - AI analysis pipeline: **Blocked** — no backend function/edge function written yet.
@@ -150,11 +156,11 @@ Connect the Dashboard page (`/app/dashboard`) to `useJourney()` and `useResume()
 
 | Area | Completion | Notes |
 | :--- | :--- | :--- |
-| **Overall** | **~22%** | Infrastructure solid; UI pages mostly mocked |
+| **Overall** | **~28%** | Resume page fully wired; Dashboard next |
 | Authentication | 100% | Full service + provider + guards + forms |
 | Journey | 100% | Full CRUD service + hook + wizard page |
 | Resume (backend) | 100% | Storage + DB service + hook complete |
-| Resume (UI integration) | 0% | Page exists; not connected to `useResume` |
+| Resume (UI integration) | 90% | Upload ✅ · Live list ✅ · Delete ❌ · Download ❌ |
 | Dashboard | 10% | UI shell exists; all data is hardcoded |
 | AI Analysis Pipeline | 0% | Not implemented |
 | Insights | 5% | UI-only mock |
@@ -212,20 +218,20 @@ Connect the Dashboard page (`/app/dashboard`) to `useJourney()` and `useResume()
 ### Resume Feature
 | Item | Value |
 | :--- | :--- |
-| **Status** | ⚠️ Backend complete — UI not connected |
+| **Status** | 🟡 UI Integrated — delete + download pending |
 | **Purpose** | Upload PDF resumes, version-track them, display history |
 | **Folder** | `src/features/resume/` |
-| **Pages** | **EMPTY** — no page component in `feature/pages/` yet |
-| **Components** | **EMPTY** — no components in `feature/components/` yet |
+| **Pages** | **EMPTY** — page is rendered directly from the route file |
+| **Components** | **EMPTY** — no dedicated components; `Mini` stat card is inline in the route file |
 | **Hooks** | `useResume()` — upload, delete, load latest, load all, refresh |
 | **Services** | `resumeService` (uploadResume, getLatestResumeByUserId, getAllResumesByUserId, deleteResume), `storageService` (uploadResumeFile, deleteResumeFile, getSignedResumeUrl) |
 | **Types** | ResumeVersion, CreateResumeRequest |
 | **Context Provider** | None |
 | **DB Tables** | `resume_versions` |
 | **Storage Buckets** | `resume-files` |
-| **Integration** | UI at `/app/resume` is mock-only; hook exists but is not called from any UI |
-| **Missing Pieces** | Resume page connected to `useResume()`, upload handler, delete handler, version list rendered from real data, signed URL generation |
-| **Next Steps** | Call `useResume()` from the Resume route, wire upload input to `uploadResume()`, render `resumes` list, add delete buttons |
+| **Integration** | ✅ Upload wired · ✅ `resumes` list rendered · ✅ `latestResume` sidebar · ✅ Empty states · ❌ Delete not wired · ❌ Download not wired |
+| **Missing Pieces** | Wire Trash buttons to `deleteResume(version.id, version.storage_path)`, implement signed URL download via `getSignedResumeUrl()` |
+| **Next Steps** | 1. Wire delete flow · 2. Wire download via signed URL · 3. Connect resume data to Dashboard |
 
 ---
 
@@ -364,11 +370,12 @@ Connect the Dashboard page (`/app/dashboard`) to `useJourney()` and `useResume()
 | Item | Status |
 | :--- | :--- |
 | UI | ✅ |
-| Logic | ❌ |
-| API | ❌ |
-| Mock Data | YES — 4 hardcoded version objects in `const versions = [...]` |
-| Components Used | PageHeader, Mini (inline); file input is non-functional `<input type="file" />` |
-| Missing | Call `useResume()` to load real data, wire `<input>` to `uploadResume()`, wire delete buttons to `deleteResume()`, render `resumes` array |
+| Logic | ✅ Upload + live data rendering |
+| API | ✅ Upload → Supabase Storage + DB |
+| Mock Data | NO — all mock data removed |
+| Components Used | PageHeader, Mini (inline); `useResume()`, `useJourney()` |
+| Wired | Upload (PDF only, disabled while loading) · `latestResume` sidebar · `resumes` version table · `formatDate()` for dates · Empty states |
+| NOT Wired | Delete (Trash buttons disabled, `title="Coming soon"`) · Download (disabled) · Export all (disabled) · Readiness score (TODO — needs AI analysis) · Notes column (TODO — needs DB field) |
 
 ---
 
@@ -981,7 +988,7 @@ function normalizeResumeError(err: unknown): ResumeServiceError {
 | File | Mock Data |
 | :--- | :--- |
 | `src/routes/app.dashboard.tsx` | All stat values, chart series, task list, skill gaps |
-| `src/routes/app.resume.tsx` | `const versions = [...]` — 4 hardcoded resume versions |
+| ~~`src/routes/app.resume.tsx`~~ | ~~`const versions = [...]`~~ — **Removed. Now uses live `useResume()` data.** |
 | `src/routes/app.insights.tsx` | All scores, skill breakdowns, gap list |
 | `src/routes/app.compare.tsx` | Version pair, diff data |
 | `src/routes/app.suggestions.tsx` | All suggestion groups |
@@ -994,6 +1001,7 @@ function normalizeResumeError(err: unknown): ResumeServiceError {
 - `storageService.ts`: No TODOs
 - `useResume.ts`: TODO comment in `deleteResume` about non-atomic delete
 - `OnboardingGate.tsx`: Debug `console.log` present
+- `app.resume.tsx`: TODO — readiness score placeholder (needs AI analysis) · TODO — notes column (needs `notes` field in `resume_versions`)
 
 ### Limitations
 - No password reset flow implemented
@@ -1005,13 +1013,13 @@ function normalizeResumeError(err: unknown): ResumeServiceError {
 
 ## 18. Roadmap
 
-### Immediate Next Tasks (Sprint 2)
-1. **Connect Resume Page UI** to `useResume()` hook
-   - Wire `<input type="file">` to `uploadResume(file, journeyId)`
-   - Render `resumes` array in the version history table
-   - Wire delete buttons to `deleteResume(resumeId, storagePath)`
-   - Display `latestResume` in the "Current resume" sidebar panel
-   - Generate signed URL for download via `storageService.getSignedResumeUrl()`
+### Immediate Next Tasks (Sprint 2 — in progress)
+1. ~~**Connect Resume Page UI** to `useResume()` hook~~ ✅ **DONE**
+   - ~~Wire `<input type="file">` to `uploadResume(file, journeyId)`~~ ✅
+   - ~~Render `resumes` array in the version history table~~ ✅
+   - ~~Display `latestResume` in the "Current resume" sidebar panel~~ ✅
+   - Wire Trash buttons to `deleteResume(resumeId, storagePath)` ← **NEXT**
+   - Wire Download buttons via `storageService.getSignedResumeUrl(storagePath)`
 
 2. **Connect Dashboard Page** to live data
    - Replace hardcoded role name with `useJourney().journey.target_role`
@@ -1042,10 +1050,9 @@ function normalizeResumeError(err: unknown): ResumeServiceError {
 
 ### Sprint 7 — Polish
 17. Add loading skeleton states to all pages
-18. Add empty state UI when no data exists
-19. Add error boundary and fallback UI
-20. Remove `console.log` from `OnboardingGate`
-21. Remove mock data from all route files
+18. Add error boundary and fallback UI
+19. Remove `console.log` from `OnboardingGate`
+20. Remove mock data from all remaining route files
 
 ---
 
@@ -1067,10 +1074,21 @@ CURRENT STATE:
    - resumeService: inserts/reads/deletes resume_versions rows
    - useResume: upload (with DB rollback on failure), delete, load latest, load all
 
-❌ Resume Page UI: NOT connected
-   - UI exists at /app/resume (file: app.resume.tsx)
-   - All data is hardcoded mock data
-   - <input type="file"> is non-functional
+✅ Resume Page UI: INTEGRATED (upload + live data)
+   - File: src/routes/app.resume.tsx
+   - useResume() and useJourney() are imported and initialized
+   - Upload: <input accept="application/pdf"> → handleFileChange → uploadResume(file, journey.id)
+   - Upload card disabled (pointer-events-none, opacity-60) while isLoading
+   - Upload error rendered below drop zone from useResume().error
+   - Current resume aside: shows latestResume.file_name, version_number, formatted uploaded_at
+   - Empty state rendered when latestResume is null
+   - Version table: resumes.map() using real DB fields (id, file_name, version_number, uploaded_at)
+   - Latest version highlighted by comparing v.id === latestResume?.id
+   - Empty state rendered when resumes.length === 0
+   - formatDate() helper converts ISO timestamps to "Jun 30, 2026" format
+   - Readiness score: shows "—" placeholder (TODO: needs AI analysis)
+   - Notes column: shows "—" (TODO: needs notes field in resume_versions table)
+   - Delete/Download/Export buttons: disabled + title="Coming soon"
 
 ❌ Dashboard: NOT integrated
    - Full UI exists at /app/dashboard
@@ -1081,19 +1099,20 @@ CURRENT STATE:
 
 NEXT RECOMMENDED TASK:
 =====================
-1. Open: src/routes/app.resume.tsx
-2. Import useResume() from src/features/resume/hooks/useResume.ts
-3. Replace the hardcoded `const versions = [...]` with the real `resumes` array from useResume()
-4. Wire <input type="file"> onChange to uploadResume(file, journey.id)
-   — get journeyId from useJourney().journey.id
-5. Wire Trash2 buttons to deleteResume(version.id, version.storage_path)
-6. Show latestResume in the "Current resume" aside panel
+1. Wire delete resume flow in src/routes/app.resume.tsx:
+   - Change Trash buttons from disabled to active
+   - onClick: () => deleteResume(v.id, v.storage_path)
+   - deleteResume() already exists in useResume() — no service changes needed
+   - Destructure deleteResume from useResume() (it is already exported by the hook)
+
+2. Wire download:
+   - onClick: async () => { const { data } = await storageService.getSignedResumeUrl(v.storage_path); window.open(data, '_blank'); }
+   - storageService must be imported directly for this one-off use
 
 DO NOT:
 =======
-- Rebuild any existing UI
-- Create a new file upload component if the existing <input> can be extended
 - Call supabase directly from the route component
-- Create a new service — resumeService and storageService already do everything needed
-- Create a new hook — useResume() already does everything needed
+- Create a new hook — useResume() already has deleteResume()
+- Create a new service — storageService.getSignedResumeUrl() already exists
+- Rebuild any UI — only wire the existing disabled buttons
 ```

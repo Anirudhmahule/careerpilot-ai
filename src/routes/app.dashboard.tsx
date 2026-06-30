@@ -11,6 +11,9 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
+import { useAuth } from "@/features/auth/hooks/use-auth";
+import { useJourney } from "@/features/journey/hooks/useJourney";
+import { useResume } from "@/features/resume/hooks/useResume";
 
 export const Route = createFileRoute("/app/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — CareerPilot AI" }] }),
@@ -18,11 +21,20 @@ export const Route = createFileRoute("/app/dashboard")({
 });
 
 function Dashboard() {
+  const { user } = useAuth();
+  const { journey } = useJourney();
+  const { latestResume } = useResume();
+
+  const displayName = user?.email
+    ? user.email.split('@')[0]
+    : 'User';
+  const capitalizedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+
   return (
     <div className="mx-auto max-w-7xl">
       <PageHeader
         eyebrow="Workspace"
-        title="Welcome back, Arjun"
+        title={`Welcome back, ${capitalizedName}`}
         description="Here's where your career stands today, and what's next."
         actions={
           <>
@@ -53,7 +65,7 @@ function Dashboard() {
           <div className="flex items-start justify-between">
             <div>
               <div className="text-xs font-medium">Readiness trend</div>
-              <div className="text-xs text-muted-foreground">Last 12 weeks · Senior Frontend Eng.</div>
+              <div className="text-xs text-muted-foreground">Last 12 weeks · {journey?.target_role || "Senior Frontend Eng."}</div>
             </div>
             <div className="flex items-center gap-1 rounded-md border border-border bg-surface p-0.5 text-[11px]">
               {["1M", "3M", "6M", "All"].map((t, i) => (
@@ -121,7 +133,9 @@ function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs font-medium">Roadmap progress</div>
-              <div className="text-xs text-muted-foreground">4 sprints · 11 weeks</div>
+              <div className="text-xs text-muted-foreground">
+                {journey ? `${journey.timeline_months} months · ${journey.daily_study_hours}h / day` : "4 sprints · 11 weeks"}
+              </div>
             </div>
             <Link to="/app/roadmap" className="text-xs text-primary hover:underline">View roadmap</Link>
           </div>
