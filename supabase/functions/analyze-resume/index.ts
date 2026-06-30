@@ -10,7 +10,7 @@
 // Note: If you get "Cannot find name 'Deno'", ensure the Deno VS Code extension
 // is installed and enabled for the `supabase/functions` folder, or run `npm i -D @types/deno`.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 // ─── CORS headers ─────────────────────────────────────────────────────────────
 
@@ -110,10 +110,47 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Download the resume from Storage
+    const { data: fileData, error: downloadError } = await supabaseClient
+      .storage
+      .from("resume-files")
+      .download(storagePath);
+
+    if (downloadError) {
+      console.error("Storage download error:", downloadError);
+      
+      // Handle failures by updating the snapshot to "failed"
+      await supabaseClient
+        .from("analysis_snapshots")
+        .update({ 
+          status: "failed", 
+          error_message: `Storage download failed: ${downloadError.message}`,
+          completed_at: new Date().toISOString(),
+          processing_time_ms: Date.now() - startTime,
+        })
+        .eq("id", analysisSnapshotId);
+        
+      return json({ error: `Storage download failed: ${downloadError.message}` }, 500);
+    }
+
+    // Convert the file to an ArrayBuffer
+    const arrayBuffer = await fileData.arrayBuffer();
+    const fileSize = arrayBuffer.byteLength;
+
+    // TODO:
+    // After PDF extraction and AI processing,
+    // update:
+    //
+    // status
+    // raw_response
+    // processing_time_ms
+    // completed_at
+
     // Foundation response — AI pipeline will be wired here in the next commit.
     return json({
       success: true,
       processingTimeMs: Date.now() - startTime,
+      fileSize,
     });
   } catch (err) {
     console.error("Unhandled exception in Edge Function:", err);
