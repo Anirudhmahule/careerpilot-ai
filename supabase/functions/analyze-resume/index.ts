@@ -1,27 +1,17 @@
-// analyze-resume/index.ts
-//
-// Supabase Edge Function — AI Resume Analysis (Foundation)
-//
-// This version establishes the function structure and validates the request.
-// AI integration (PDF download, text extraction, OpenAI call) will be added
-// in subsequent commits.
-
-// Bring in Deno's built-in type definitions.
-// Note: If you get "Cannot find name 'Deno'", ensure the Deno VS Code extension
-// is installed and enabled for the `supabase/functions` folder, or run `npm i -D @types/deno`.
-
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-// ─── CORS headers ─────────────────────────────────────────────────────────────
+import { AnalyzeResumeRequestSchema } from "../_shared/validators/request.schema.ts";
+import { logger } from "../_shared/utils/logger.ts";
+import { SupabaseSnapshotRepository } from "../_shared/repositories/supabase-snapshot.repository.ts";
+import { SupabaseStorageProvider } from "../_shared/providers/supabase-storage.provider.ts";
+import { PdfParseExtractor } from "../_shared/providers/pdf-parse.extractor.ts";
+import { OpenAIProvider } from "../_shared/providers/openai.provider.ts";
+import { ResumeAnalysisOrchestrator } from "./orchestrators/resume-analysis.orchestrator.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-api-version, prefer, accept",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-api-version, prefer, accept",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -30,54 +20,33 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-// ─── Handler ──────────────────────────────────────────────────────────────────
-
 Deno.serve(async (req: Request) => {
   try {
-    // Handle CORS preflight.
     if (req.method === "OPTIONS") {
       return new Response(null, { headers: CORS_HEADERS });
     }
 
-    // Reject non-POST methods.
     if (req.method !== "POST") {
-      return json(
-        { error: `Method not allowed. Expected POST, received ${req.method}.` },
-        405
-      );
+      return json({ error: `Method not allowed. Expected POST, received ${req.method}.` }, 405);
     }
 
-    // Parse the request body.
-    let body: Record<string, unknown>;
+    // 1. Parse and Validate Request
+    let body: unknown;
     try {
       body = await req.json();
     } catch {
       return json({ error: "Invalid JSON body." }, 400);
     }
 
-    // Validate required fields.
-    const { analysisSnapshotId, storagePath } = body;
-
-    if (!analysisSnapshotId || typeof analysisSnapshotId !== "string") {
-      return json(
-        { error: "Missing or invalid field: analysisSnapshotId (string required)." },
-        400
-      );
+    const parseResult = AnalyzeResumeRequestSchema.safeParse(body);
+    if (!parseResult.success) {
+      logger.warn("Validation failed", parseResult.error.format());
+      return json({ error: "Validation failed", details: parseResult.error.format() }, 400);
     }
+    const requestPayload = parseResult.data;
 
-    if (!storagePath || typeof storagePath !== "string") {
-      return json(
-        { error: "Missing or invalid field: storagePath (string required)." },
-        400
-      );
-    }
-
-    // Create Supabase client using the user's auth header
+    // 2. Initialize Supabase Client
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      console.warn("No Authorization header found in request.");
-    }
-    
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
     
@@ -85,75 +54,41 @@ Deno.serve(async (req: Request) => {
       throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables.");
     }
 
-    const supabaseClient = createClient(
-      supabaseUrl,
-      supabaseAnonKey,
-      { global: { headers: { Authorization: authHeader ?? "" } } }
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader ?? "" } }
+    });
+
+    // 3. Setup Dependencies (Dependency Injection)
+    const snapshotRepository = new SupabaseSnapshotRepository(supabaseClient);
+    const storageProvider = new SupabaseStorageProvider(supabaseClient);
+    const pdfExtractor = new PdfParseExtractor();
+    const aiProvider = new OpenAIProvider();
+    
+    const resumeAnalysisOrchestrator = new ResumeAnalysisOrchestrator(
+      logger,
+      snapshotRepository,
+      storageProvider,
+      pdfExtractor,
+      aiProvider
     );
 
-    const startTime = Date.now();
+    // 4. Execute Orchestrator
+    const result = await resumeAnalysisOrchestrator.execute(requestPayload);
 
-    // Update snapshot from 'pending' to 'processing'
-    const { error: updateError } = await supabaseClient
-      .from("analysis_snapshots")
-      .update({ status: "processing" })
-      .eq("id", analysisSnapshotId);
-
-    if (updateError) {
-      console.error(updateError);
-      return json(
-        { 
-          error: updateError.message,
-          code: updateError.code
-        }, 
-        500
-      );
+    // 5. Handle Result Monad
+    if (result.type === "success") {
+      return json(result.data);
+    } else {
+      // It's a Failure
+      const errMessage = result.error.message;
+      if (errMessage.startsWith("Conflict:")) {
+        return json({ error: errMessage }, 409);
+      }
+      return json({ error: errMessage }, 500);
     }
-
-    // Download the resume from Storage
-    const { data: fileData, error: downloadError } = await supabaseClient
-      .storage
-      .from("resume-files")
-      .download(storagePath);
-
-    if (downloadError) {
-      console.error("Storage download error:", downloadError);
-      
-      // Handle failures by updating the snapshot to "failed"
-      await supabaseClient
-        .from("analysis_snapshots")
-        .update({ 
-          status: "failed", 
-          error_message: `Storage download failed: ${downloadError.message}`,
-          completed_at: new Date().toISOString(),
-          processing_time_ms: Date.now() - startTime,
-        })
-        .eq("id", analysisSnapshotId);
-        
-      return json({ error: `Storage download failed: ${downloadError.message}` }, 500);
-    }
-
-    // Convert the file to an ArrayBuffer
-    const arrayBuffer = await fileData.arrayBuffer();
-    const fileSize = arrayBuffer.byteLength;
-
-    // TODO:
-    // After PDF extraction and AI processing,
-    // update:
-    //
-    // status
-    // raw_response
-    // processing_time_ms
-    // completed_at
-
-    // Foundation response — AI pipeline will be wired here in the next commit.
-    return json({
-      success: true,
-      processingTimeMs: Date.now() - startTime,
-      fileSize,
-    });
+    
   } catch (err) {
-    console.error("Unhandled exception in Edge Function:", err);
+    logger.error("Unhandled exception in Edge Function:", err);
     return json({ 
       error: "Internal Server Error", 
       details: err instanceof Error ? err.message : String(err)
