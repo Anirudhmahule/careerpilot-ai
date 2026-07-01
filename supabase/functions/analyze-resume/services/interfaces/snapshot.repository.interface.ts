@@ -1,4 +1,4 @@
-import { SnapshotStatus } from "../types/domain.types.ts";
+import { SnapshotStatus } from "../../types/resume-analysis.types.ts";
 
 export interface SnapshotRepositoryInterface {
   getStatus(id: string): Promise<SnapshotStatus | null>;

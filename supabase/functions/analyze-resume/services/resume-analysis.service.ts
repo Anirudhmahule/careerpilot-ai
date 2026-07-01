@@ -1,10 +1,10 @@
-import { Logger } from "../../_shared/utils/logger.ts";
-import { SnapshotRepositoryInterface } from "../../_shared/interfaces/snapshot.repository.interface.ts";
-import { StorageProvider } from "../../_shared/interfaces/storage.provider.interface.ts";
-import { PDFExtractor } from "../../_shared/interfaces/pdf-extractor.provider.interface.ts";
-import { AIProvider } from "../../_shared/interfaces/ai.provider.interface.ts";
-import { AnalyzeResumeCommand, ResumeAnalysisResult } from "../../_shared/types/domain.types.ts";
-import { Result, success, failure } from "../../_shared/utils/result.ts";
+import { Logger } from "../utils/logger.ts";
+import { SnapshotRepositoryInterface } from "./interfaces/snapshot.repository.interface.ts";
+import { StorageProvider } from "./interfaces/storage.provider.interface.ts";
+import { PDFExtractor } from "./interfaces/pdf-extractor.provider.interface.ts";
+import { AIProvider } from "./interfaces/ai.provider.interface.ts";
+import { AnalyzeResumeCommand, AnalyzeResumeResponse } from "../types/resume-analysis.types.ts";
+import { Result, success, failure } from "../utils/result.ts";
 
 export class ResumeAnalysisOrchestrator {
   constructor(
@@ -15,7 +15,7 @@ export class ResumeAnalysisOrchestrator {
     private aiProvider: AIProvider
   ) {}
 
-  async execute(command: AnalyzeResumeCommand): Promise<Result<ResumeAnalysisResult, Error>> {
+  async execute(command: AnalyzeResumeCommand): Promise<Result<AnalyzeResumeResponse, Error>> {
     const { analysisSnapshotId, storagePath } = command;
     const overallStartTime = performance.now();
     
@@ -51,14 +51,8 @@ export class ResumeAnalysisOrchestrator {
       const aiRawResponse = await this.aiProvider.analyzeResume(pdfResult.text, "v1");
       const aiMs = performance.now() - aiStart;
 
-      const finalResponse = {
-        success: true,
-        extracted: {
-          textPreview: pdfResult.text.substring(0, 200),
-          pageCount: pdfResult.pageCount,
-          fileSize: arrayBuffer.byteLength,
-        },
-        aiResponse: JSON.parse(aiRawResponse)
+      const finalResponse: AnalyzeResumeResponse = {
+        analysis: JSON.parse(aiRawResponse)
       };
 
       // 5. Mark Completed

@@ -1,6 +1,6 @@
 import { SupabaseClient } from "npm:@supabase/supabase-js@2";
-import { SnapshotRepositoryInterface } from "../interfaces/snapshot.repository.interface.ts";
-import { SnapshotStatus } from "../types/domain.types.ts";
+import { SnapshotRepositoryInterface } from "../services/interfaces/snapshot.repository.interface.ts";
+import { SnapshotStatus } from "../types/resume-analysis.types.ts";
 
 export class SupabaseSnapshotRepository implements SnapshotRepositoryInterface {
   constructor(private supabase: SupabaseClient) {}

@@ -1,4 +1,4 @@
-import { AIProvider } from "../interfaces/ai.provider.interface.ts";
+import { AIProvider } from "./interfaces/ai.provider.interface.ts";
 
 export class OpenAIProvider implements AIProvider {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

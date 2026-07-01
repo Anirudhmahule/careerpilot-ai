@@ -1,11 +1,12 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { AnalyzeResumeRequestSchema } from "../_shared/validators/request.schema.ts";
-import { logger } from "../_shared/utils/logger.ts";
-import { SupabaseSnapshotRepository } from "../_shared/repositories/supabase-snapshot.repository.ts";
-import { SupabaseStorageProvider } from "../_shared/providers/supabase-storage.provider.ts";
-import { PdfParseExtractor } from "../_shared/providers/pdf-parse.extractor.ts";
-import { OpenAIProvider } from "../_shared/providers/openai.provider.ts";
-import { ResumeAnalysisOrchestrator } from "./orchestrators/resume-analysis.orchestrator.ts";
+import { AnalyzeResumeRequestSchema } from "./validators/request.schema.ts";
+import { logger } from "./utils/logger.ts";
+import { SupabaseSnapshotRepository } from "./repositories/snapshot.repository.ts";
+import { SupabaseStorageProvider } from "./services/supabase-storage.provider.ts";
+import { PdfParseExtractor } from "./services/pdf-parse.extractor.ts";
+import { OpenAIProvider } from "./services/openai.provider.ts";
+import { ResumeAnalysisOrchestrator } from "./services/resume-analysis.service.ts";
+import { AnalyzeResumeCommand } from "./types/resume-analysis.types.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -43,7 +44,7 @@ Deno.serve(async (req: Request) => {
       logger.warn("Validation failed", parseResult.error.format());
       return json({ error: "Validation failed", details: parseResult.error.format() }, 400);
     }
-    const requestPayload = parseResult.data;
+    const requestPayload = parseResult.data as AnalyzeResumeCommand;
 
     // 2. Initialize Supabase Client
     const authHeader = req.headers.get("Authorization");

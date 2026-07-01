@@ -1,5 +1,5 @@
 import { SupabaseClient } from "npm:@supabase/supabase-js@2";
-import { StorageProvider } from "../interfaces/storage.provider.interface.ts";
+import { StorageProvider } from "./interfaces/storage.provider.interface.ts";
 
 export class SupabaseStorageProvider implements StorageProvider {
   constructor(private supabase: SupabaseClient) {}
