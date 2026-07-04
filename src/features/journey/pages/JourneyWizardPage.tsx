@@ -26,11 +26,9 @@ import type { JourneyRole, ExperienceLevel } from '../types/journey.types';
 
 const wizardSchema = z.object({
     target_role: z.enum([
-        'Software Engineer',
         'Frontend Engineer',
         'React Developer',
-        'Full Stack Engineer',
-        'Backend Engineer',
+        'Next.js Developer',
     ] as const),
     experience_level: z.enum([
         'Student',
@@ -67,13 +65,6 @@ interface NumericOption {
 
 const ROLE_OPTIONS: RoleOption[] = [
     {
-        value: 'Software Engineer',
-        label: 'Software Engineer',
-        description: 'General software engineering roles',
-        icon: '💻',
-    },
-    {
-
         value: 'Frontend Engineer',
         label: 'Frontend Engineer',
         description: 'HTML, CSS, JS, frameworks & UX',
@@ -86,16 +77,10 @@ const ROLE_OPTIONS: RoleOption[] = [
         icon: '⚛️',
     },
     {
-        value: 'Full Stack Engineer',
-        label: 'Full Stack Engineer',
-        description: 'Frontend + backend + databases',
-        icon: '🔧',
-    },
-    {
-        value: 'Backend Engineer',
-        label: 'Backend Engineer',
-        description: 'APIs, databases & infrastructure',
-        icon: '⚙️',
+        value: 'Next.js Developer',
+        label: 'Next.js Developer',
+        description: 'Full-stack React, SSR & App Router',
+        icon: '▲',
     },
 ];
 

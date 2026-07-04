@@ -5,14 +5,17 @@ import { SupabaseSnapshotRepository } from "./repositories/snapshot.repository.t
 import { SupabaseStorageProvider } from "./services/supabase-storage.provider.ts";
 import { PdfParseExtractor } from "./services/pdf-parse.extractor.ts";
 import { OpenAIProvider } from "./services/openai.provider.ts";
+import { GeminiProvider } from "./services/gemini.provider.ts";
 import { ResumeAnalysisOrchestrator } from "./services/resume-analysis.service.ts";
 import { AnalyzeResumeCommand } from "./types/resume-analysis.types.ts";
+import { ConflictError } from "./errors/conflict.error.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-api-version, prefer, accept",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -63,7 +66,7 @@ Deno.serve(async (req: Request) => {
     const snapshotRepository = new SupabaseSnapshotRepository(supabaseClient);
     const storageProvider = new SupabaseStorageProvider(supabaseClient);
     const pdfExtractor = new PdfParseExtractor();
-    const aiProvider = new OpenAIProvider();
+    const aiProvider = new GeminiProvider();
     
     const resumeAnalysisOrchestrator = new ResumeAnalysisOrchestrator(
       logger,
@@ -80,12 +83,11 @@ Deno.serve(async (req: Request) => {
     if (result.type === "success") {
       return json(result.data);
     } else {
-      // It's a Failure
-      const errMessage = result.error.message;
-      if (errMessage.startsWith("Conflict:")) {
-        return json({ error: errMessage }, 409);
+      const err = result.error;
+      if (err instanceof ConflictError) {
+        return json({ error: err.message }, 409);
       }
-      return json({ error: errMessage }, 500);
+      return json({ error: err.message }, 500);
     }
     
   } catch (err) {

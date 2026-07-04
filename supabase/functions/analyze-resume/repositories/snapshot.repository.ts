@@ -27,14 +27,14 @@ export class SupabaseSnapshotRepository implements SnapshotRepositoryInterface {
     }
   }
 
-  async markFailed(id: string, errorMessage: string, startTime: number): Promise<void> {
+  async markFailed(id: string, errorMessage: string, processingTimeMs: number): Promise<void> {
     const { error } = await this.supabase
       .from("analysis_snapshots")
       .update({
         status: "failed",
         error_message: errorMessage,
         completed_at: new Date().toISOString(),
-        processing_time_ms: Date.now() - startTime,
+        processing_time_ms: processingTimeMs,
       })
       .eq("id", id);
       
@@ -43,14 +43,14 @@ export class SupabaseSnapshotRepository implements SnapshotRepositoryInterface {
     }
   }
 
-  async markCompleted(id: string, rawResponse: unknown, startTime: number): Promise<void> {
+  async markCompleted(id: string, rawResponse: unknown, processingTimeMs: number): Promise<void> {
     const { error } = await this.supabase
       .from("analysis_snapshots")
       .update({
         status: "completed",
         raw_response: rawResponse,
         completed_at: new Date().toISOString(),
-        processing_time_ms: Date.now() - startTime,
+        processing_time_ms: processingTimeMs,
       })
       .eq("id", id);
       

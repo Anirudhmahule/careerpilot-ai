@@ -11,7 +11,8 @@
     "paths": {
       "npm:@supabase/supabase-js@2": ["../../../node_modules/@supabase/supabase-js"],
       "npm:pdf-parse": ["../../../node_modules/@types/pdf-parse"],
-      "npm:zod": ["../../../node_modules/zod"]
+      "npm:zod": ["../../../node_modules/zod"],
+      "npm:zod/v4": ["../../../node_modules/zod/v4"]
     }
   }
 }

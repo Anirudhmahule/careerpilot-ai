@@ -47,13 +47,30 @@ function Resume() {
     if (!latestResume) return;
     const { error: err, data: snapshot } = await createSnapshot({
       resume_version_id: latestResume.id,
-      model: "gpt-5.5",
-      prompt_version: "v1"
+      model: "gemini-3.5-flash",
+      prompt_version: "v2"
     });
     
     if (!err && snapshot) {
-      void analysisAiService.invokeAnalysis(snapshot.id, latestResume.storage_path);
-      void navigate({ to: "/app/analysis" });
+      // Fire-and-forget: the Edge Function runs asynchronously and writes
+      // results directly to the analysis_snapshots row. Errors are logged
+      // here for observability but do not block navigation — the analysis
+      // screen polls the row status independently.
+      analysisAiService
+        .invokeAnalysis(snapshot.id, latestResume.storage_path)
+        .then(({ error: aiError }) => {
+          if (aiError) {
+            console.error("[handleAnalyze] Edge Function invocation failed:", aiError);
+          }
+        })
+        .catch((e: unknown) => {
+          console.error("[handleAnalyze] Edge Function invocation threw:", e);
+        });
+
+      void navigate({
+        to: "/app/analysis",
+        search: { snapshotId: snapshot.id, fileName: latestResume.file_name },
+      });
     }
   }
 
@@ -107,6 +124,7 @@ function Resume() {
 
           <Link
             to="/app/analysis"
+            search={{ snapshotId: undefined, fileName: undefined }}
             className="mt-4 inline-flex items-center gap-1 text-xs text-primary hover:underline"
           >
             Skip upload, see analysis demo <ArrowRight className="h-3 w-3" />

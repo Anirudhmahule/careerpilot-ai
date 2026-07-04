@@ -1,4 +1,52 @@
-export type SnapshotStatus = 'pending' | 'processing' | 'completed' | 'failed';
+/**
+ * resume-analysis.types.ts
+ *
+ * TWO-PHASE TYPE CONTRACT:
+ *
+ *   Phase 1 — AI Extraction
+ *     The AI produces a `ResumeExtraction` object validated by
+ *     `ResumeExtractionSchema` (Zod). No IDs, no normalizedName,
+ *     no confidence scores. Facts only.
+ *
+ *   Phase 2 — Application Domain
+ *     After validation the orchestrator stamps IDs (crypto.randomUUID())
+ *     and produces a `ResumeAnalysis` object. This is what gets stored
+ *     and returned to clients.
+ *
+ * ALL domain types are derived from Zod schemas via z.infer.
+ * Do NOT write TypeScript interfaces by hand for anything the AI produces
+ * or the application stores — define the shape in the Zod schema instead.
+ *
+ * Never pass raw AI output beyond the validation boundary.
+ */
+
+// ---------------------------------------------------------------------------
+// Re-export all domain and extraction types from the single source of truth.
+// ---------------------------------------------------------------------------
+
+export type {
+  ResumeExtraction,
+  ResumeAnalysis,
+  Skill,
+  Achievement,
+  Experience,
+  Project,
+  Education,
+  Certification,
+  Language,
+  Links,
+  MissingInformation,
+  Warning,
+  AnalysisMetadata,
+  PersonalInformation,
+  Summary,
+} from "../validators/resume-extraction.schema.ts";
+
+// ---------------------------------------------------------------------------
+// Infrastructure types — not AI-related, hand-written here is correct.
+// ---------------------------------------------------------------------------
+
+export type SnapshotStatus = "pending" | "processing" | "completed" | "failed";
 
 export interface AnalyzeResumeCommand {
   analysisSnapshotId: string;
@@ -22,121 +70,5 @@ export interface ResumeExtractionResult {
 }
 
 export interface AnalyzeResumeResponse {
-  analysis: ResumeAnalysis;
-}
-
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string | null;
-  evidence: string[];
-}
-
-export interface Warning {
-  code: string;
-  message: string;
-}
-
-export interface ResumeAnalysis {
-  metadata: AnalysisMetadata;
-  personal: PersonalInformation;
-  summary: Summary;
-  skills: Skill[];
-  experience: Experience[];
-  projects: Project[];
-  education: Education[];
-  certifications: Certification[];
-  achievements: Achievement[];
-  languages: Language[];
-  links: Links;
-  missingInformation: MissingInformation[];
-  warnings: Warning[];
-}
-
-export interface AnalysisMetadata {
-  parserVersion: string;
-  promptVersion: string;
-  language: string | null;
-}
-
-export interface PersonalInformation {
-  fullName: string | null;
-  email: string | null;
-  phone: string | null;
-  location: string | null;
-  currentTitle: string | null;
-}
-
-export interface Summary {
-  text: string | null;
-}
-
-export interface Skill {
-  id: string;
-  name: string;
-  normalizedName: string;
-  confidence: number;
-  evidence: string[];
-}
-
-export interface Experience {
-  id: string;
-  company: string;
-  title: string;
-  employmentType: string | null;
-  location: string | null;
-  startDate: string | null;
-  endDate: string | null;
-  isCurrent: boolean;
-  description: string | null;
-  responsibilities: string[];
-  achievements: Achievement[];
-  technologies: string[];
-  evidence: string[];
-}
-
-export interface Project {
-  id: string;
-  name: string;
-  role: string | null;
-  description: string | null;
-  technologies: string[];
-  features: string[];
-  github: string | null;
-  liveDemo: string | null;
-  evidence: string[];
-}
-
-export interface Education {
-  institution: string;
-  degree: string | null;
-  field: string | null;
-  cgpa: string | null;
-  startDate: string | null;
-  endDate: string | null;
-}
-
-export interface Certification {
-  id: string;
-  name: string;
-  issuer: string | null;
-  issueDate: string | null;
-  credentialUrl: string | null;
-}
-
-export interface Language {
-  name: string;
-  proficiency: string | null;
-}
-
-export interface Links {
-  github: string | null;
-  linkedin: string | null;
-  portfolio: string | null;
-  website: string | null;
-}
-
-export interface MissingInformation {
-  field: string;
-  reason: string;
+  analysis: import("../validators/resume-extraction.schema.ts").ResumeAnalysis;
 }

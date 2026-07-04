@@ -80,6 +80,12 @@ export interface IAnalysisService {
   updateSnapshot(id: string, request: UpdateAnalysisSnapshotRequest): Promise<AnalysisResult<AnalysisSnapshot>>;
 
   /**
+   * Fetch a single analysis snapshot by its id.
+   * Returns null data (not an error) when no snapshot with that id exists.
+   */
+  getSnapshotById(id: string): Promise<AnalysisResult<AnalysisSnapshot>>;
+
+  /**
    * Permanently delete an analysis snapshot by its id.
    * Returns void data on success.
    */
@@ -168,6 +174,26 @@ class AnalysisService implements IAnalysisService {
       }
 
       return { data: data as AnalysisSnapshot, error: null };
+    } catch (err) {
+      return { data: null, error: normalizeAnalysisError(err) };
+    }
+  }
+
+  async getSnapshotById(
+    id: string,
+  ): Promise<AnalysisResult<AnalysisSnapshot>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) {
+        return { data: null, error: normalizeAnalysisError(error) };
+      }
+
+      return { data: (data as AnalysisSnapshot) ?? null, error: null };
     } catch (err) {
       return { data: null, error: normalizeAnalysisError(err) };
     }

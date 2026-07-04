@@ -1,11 +1,20 @@
 // ─── Role union ───────────────────────────────────────────────────────────────
 
 export type JourneyRole =
-    | 'Software Engineer'
     | 'Frontend Engineer'
     | 'React Developer'
-    | 'Full Stack Engineer'
-    | 'Backend Engineer';
+    | 'Next.js Developer';
+
+export type LegacyJourneyRole =
+    | 'Software Engineer'
+    | 'Backend Engineer'
+    | 'Full Stack Engineer';
+
+export type PersistedJourneyRole = JourneyRole | LegacyJourneyRole;
+
+export function isJourneyRole(value: string): value is JourneyRole {
+    return ['Frontend Engineer', 'React Developer', 'Next.js Developer'].includes(value);
+}
 
 // ─── Experience level union ───────────────────────────────────────────────────
 
@@ -20,7 +29,7 @@ export type ExperienceLevel =
 export interface Journey {
     id: string;
     user_id: string;
-    target_role: JourneyRole;
+    target_role: PersistedJourneyRole;
     experience_level: ExperienceLevel;
     timeline_months: number;
     daily_study_hours: number;

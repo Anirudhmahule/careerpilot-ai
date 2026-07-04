@@ -1,4 +1,4 @@
-import { z } from "npm:zod";
+import { z } from "npm:zod/v4";
 
 export const AnalyzeResumeRequestSchema = z.object({
   analysisSnapshotId: z.string().uuid("Invalid analysisSnapshotId (must be a valid UUID)"),
