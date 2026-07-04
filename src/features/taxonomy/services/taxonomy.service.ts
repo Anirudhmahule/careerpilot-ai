@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase';
+import { supabase as globalSupabase } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   EvidenceOccurrence,
   TaxonomyResult,
@@ -45,7 +46,8 @@ export interface ITaxonomyService {
    * Mutates nothing. Returns a new array of occurrences with normalizedSkillId populated.
    */
   resolveEvidenceOccurrences(
-    occurrences: EvidenceOccurrence[]
+    occurrences: EvidenceOccurrence[],
+    client?: SupabaseClient
   ): Promise<TaxonomyResult<EvidenceOccurrence[]>>;
 
   /**
@@ -53,7 +55,8 @@ export interface ITaxonomyService {
    * Rejects unsupported/legacy roles.
    */
   getRoleRequirements(
-    roleSlug: string
+    roleSlug: string,
+    client?: SupabaseClient
   ): Promise<TaxonomyResult<{ roleId: string; roleName: string; roleSlug: string; requirements: RoleSkillRequirement[] }>>;
 
   /**
@@ -130,7 +133,8 @@ class TaxonomyService implements ITaxonomyService {
   }
 
   async resolveEvidenceOccurrences(
-    occurrences: EvidenceOccurrence[]
+    occurrences: EvidenceOccurrence[],
+    client: SupabaseClient = globalSupabase
   ): Promise<TaxonomyResult<EvidenceOccurrence[]>> {
     if (occurrences.length === 0) {
       return { data: [], error: null };
@@ -153,7 +157,7 @@ class TaxonomyService implements ITaxonomyService {
       }
 
       // 2. Batch query canonical skills
-      const { data: canonicalSkills, error: canonicalError } = await supabase
+      const { data: canonicalSkills, error: canonicalError } = await client
         .from('skills')
         .select('id, normalized_name')
         .in('normalized_name', uniqueNames);
@@ -163,7 +167,7 @@ class TaxonomyService implements ITaxonomyService {
       }
 
       // 3. Batch query explicit aliases
-      const { data: aliases, error: aliasError } = await supabase
+      const { data: aliases, error: aliasError } = await client
         .from('skill_aliases')
         .select('skill_id, normalized_alias')
         .in('normalized_alias', uniqueNames);
@@ -227,7 +231,8 @@ class TaxonomyService implements ITaxonomyService {
   }
 
   async getRoleRequirements(
-    roleSlug: string
+    roleSlug: string,
+    client: SupabaseClient = globalSupabase
   ): Promise<TaxonomyResult<{ roleId: string; roleName: string; roleSlug: string; requirements: RoleSkillRequirement[] }>> {
     const supportedRoles = ['frontend-engineer', 'react-developer', 'nextjs-developer'];
     if (!supportedRoles.includes(roleSlug)) {
@@ -238,7 +243,7 @@ class TaxonomyService implements ITaxonomyService {
     }
 
     try {
-      const { data: roleData, error: roleError } = await supabase
+      const { data: roleData, error: roleError } = await client
         .from('roles')
         .select('id, name, slug')
         .eq('slug', roleSlug)
@@ -248,9 +253,9 @@ class TaxonomyService implements ITaxonomyService {
         return { data: null, error: normalizeTaxonomyError(roleError || new Error('Role not found')) };
       }
 
-      const { data: reqData, error: reqError } = await supabase
+      const { data: reqData, error: reqError } = await client
         .from('role_skill_requirements')
-        .select('skill_id, importance, skills (canonical_name)')
+        .select('skill_id, importance, skills (canonical_name, slug)')
         .eq('role_id', roleData.id);
 
       if (reqError) {
@@ -259,6 +264,7 @@ class TaxonomyService implements ITaxonomyService {
 
       const requirements: RoleSkillRequirement[] = reqData.map((row: any) => ({
         skillId: row.skill_id,
+        skillSlug: row.skills.slug,
         canonicalName: row.skills.canonical_name,
         importance: row.importance as RequirementImportance,
       }));
@@ -313,6 +319,7 @@ class TaxonomyService implements ITaxonomyService {
       if (skillOccurrences && skillOccurrences.length > 0) {
         matched.push({
           skillId: req.skillId,
+          skillSlug: req.skillSlug,
           canonicalName: req.canonicalName,
           importance: req.importance,
           occurrences: skillOccurrences,
@@ -320,6 +327,7 @@ class TaxonomyService implements ITaxonomyService {
       } else {
         missing.push({
           skillId: req.skillId,
+          skillSlug: req.skillSlug,
           canonicalName: req.canonicalName,
           importance: req.importance,
         });

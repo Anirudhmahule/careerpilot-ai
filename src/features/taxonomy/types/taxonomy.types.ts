@@ -27,12 +27,14 @@ export type RequirementImportance =
 
 export interface RoleSkillRequirement {
   skillId: string;
+  skillSlug: string;
   canonicalName: string;
   importance: RequirementImportance;
 }
 
 export interface MatchedRoleSkill {
   skillId: string;
+  skillSlug: string;
   canonicalName: string;
   importance: RequirementImportance;
   occurrences: EvidenceOccurrence[];
@@ -40,12 +42,14 @@ export interface MatchedRoleSkill {
 
 export interface MissingRoleSkill {
   skillId: string;
+  skillSlug: string;
   canonicalName: string;
   importance: RequirementImportance;
 }
 
 export interface AdditionalSkill {
   skillId: string;
+  skillSlug?: string;
   canonicalName?: string;
   occurrences: EvidenceOccurrence[];
 }

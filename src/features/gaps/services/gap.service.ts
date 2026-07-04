@@ -74,6 +74,7 @@ class GapService implements IGapService {
 
             rawGaps.push({
                 skillId: miss.skillId,
+                skillSlug: miss.skillSlug,
                 canonicalName: miss.canonicalName,
                 importance: miss.importance,
                 priority,

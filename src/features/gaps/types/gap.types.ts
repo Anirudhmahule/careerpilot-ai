@@ -25,6 +25,8 @@ export type GapPriority = 'high' | 'medium' | 'low';
 export interface SkillGap {
     /** Canonical skill ID from the taxonomy. Never rendered as a user-facing label. */
     readonly skillId: string;
+    /** Stable taxonomy slug for deterministic semantic identifiers. */
+    readonly skillSlug: string;
     /** Canonical display name from the role requirement. Use this for rendering. */
     readonly canonicalName: string;
     /** Requirement importance inherited from the role matrix. */
