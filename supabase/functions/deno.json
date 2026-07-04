@@ -2,5 +2,9 @@
   "compilerOptions": {
     "lib": ["deno.window"],
     "strict": true
+  },
+  "imports": {
+    "@/": "../../src/",
+    "zod": "npm:zod@^3.24.2"
   }
 }
