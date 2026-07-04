@@ -17,22 +17,45 @@ export interface TaxonomyResult<T = void> {
   error: TaxonomyServiceError | null;
 }
 
-// Minimal type definition for ResumeAnalysis to avoid tight coupling
-// with the backend's Zod schemas, while ensuring type safety for aggregation.
-export interface ResumeAnalysisLike {
-  skills: {
-    id: string;
-    name: string;
-    evidence: string[];
-  }[];
-  experience: {
-    id: string;
-    technologies: string[];
-    evidence: string[];
-  }[];
-  projects: {
-    id: string;
-    technologies: string[];
-    evidence: string[];
-  }[];
+// Re-export the canonical ResumeAnalysis type for use in taxonomy consumers
+export type { ResumeAnalysis as ResumeAnalysisLike } from '@/lib/resume-analysis.schema';
+
+export type RequirementImportance =
+  | "required"
+  | "important"
+  | "optional";
+
+export interface RoleSkillRequirement {
+  skillId: string;
+  canonicalName: string;
+  importance: RequirementImportance;
+}
+
+export interface MatchedRoleSkill {
+  skillId: string;
+  canonicalName: string;
+  importance: RequirementImportance;
+  occurrences: EvidenceOccurrence[];
+}
+
+export interface MissingRoleSkill {
+  skillId: string;
+  canonicalName: string;
+  importance: RequirementImportance;
+}
+
+export interface AdditionalSkill {
+  skillId: string;
+  canonicalName?: string;
+  occurrences: EvidenceOccurrence[];
+}
+
+export interface RoleMatchResult {
+  roleId: string;
+  roleName: string;
+  roleSlug: string;
+  matched: MatchedRoleSkill[];
+  missing: MissingRoleSkill[];
+  additionalSkills: AdditionalSkill[];
+  unmatchedEvidence: EvidenceOccurrence[];
 }

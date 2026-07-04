@@ -4,6 +4,12 @@ import type {
   TaxonomyResult,
   TaxonomyServiceError,
   ResumeAnalysisLike,
+  RoleMatchResult,
+  RoleSkillRequirement,
+  RequirementImportance,
+  MatchedRoleSkill,
+  MissingRoleSkill,
+  AdditionalSkill
 } from '../types/taxonomy.types';
 
 // ─── Error normaliser ─────────────────────────────────────────────────────────
@@ -41,6 +47,27 @@ export interface ITaxonomyService {
   resolveEvidenceOccurrences(
     occurrences: EvidenceOccurrence[]
   ): Promise<TaxonomyResult<EvidenceOccurrence[]>>;
+
+  /**
+   * Fetches the required skills for a target role slug.
+   * Rejects unsupported/legacy roles.
+   */
+  getRoleRequirements(
+    roleSlug: string
+  ): Promise<TaxonomyResult<{ roleId: string; roleName: string; roleSlug: string; requirements: RoleSkillRequirement[] }>>;
+
+  /**
+   * Pure deterministic matcher.
+   * Groups resolved occurrences against role requirements.
+   */
+  matchRoleRequirements(
+    roleId: string,
+    roleName: string,
+    roleSlug: string,
+    requirements: RoleSkillRequirement[],
+    resolvedOccurrences: EvidenceOccurrence[],
+    allCanonicalSkills?: { id: string; canonical_name: string }[] // For enriching AdditionalSkills
+  ): RoleMatchResult;
 }
 
 // ─── Implementation ───────────────────────────────────────────────────────────
@@ -164,7 +191,7 @@ class TaxonomyService implements ITaxonomyService {
       for (const name of uniqueNames) {
         const canonicalId = canonicalMap.get(name);
         const aliasId = aliasMap.get(name);
-        
+
         if (canonicalId && aliasId && canonicalId !== aliasId) {
           return {
             data: null,
@@ -178,7 +205,7 @@ class TaxonomyService implements ITaxonomyService {
       // 6. Enrich occurrences
       const resolvedOccurrences = occurrences.map((occ) => {
         const normalized = occ.rawName.trim().toLowerCase();
-        
+
         // canonical exact normalized-name match THEN explicit alias match
         let resolvedId: string | null = null;
         if (canonicalMap.has(normalized)) {
@@ -197,6 +224,131 @@ class TaxonomyService implements ITaxonomyService {
     } catch (err) {
       return { data: null, error: normalizeTaxonomyError(err) };
     }
+  }
+
+  async getRoleRequirements(
+    roleSlug: string
+  ): Promise<TaxonomyResult<{ roleId: string; roleName: string; roleSlug: string; requirements: RoleSkillRequirement[] }>> {
+    const supportedRoles = ['frontend-engineer', 'react-developer', 'nextjs-developer'];
+    if (!supportedRoles.includes(roleSlug)) {
+      return {
+        data: null,
+        error: { message: `Unsupported or legacy role: ${roleSlug}`, code: 'UNSUPPORTED_ROLE' },
+      };
+    }
+
+    try {
+      const { data: roleData, error: roleError } = await supabase
+        .from('roles')
+        .select('id, name, slug')
+        .eq('slug', roleSlug)
+        .single();
+
+      if (roleError || !roleData) {
+        return { data: null, error: normalizeTaxonomyError(roleError || new Error('Role not found')) };
+      }
+
+      const { data: reqData, error: reqError } = await supabase
+        .from('role_skill_requirements')
+        .select('skill_id, importance, skills (canonical_name)')
+        .eq('role_id', roleData.id);
+
+      if (reqError) {
+        return { data: null, error: normalizeTaxonomyError(reqError) };
+      }
+
+      const requirements: RoleSkillRequirement[] = reqData.map((row: any) => ({
+        skillId: row.skill_id,
+        canonicalName: row.skills.canonical_name,
+        importance: row.importance as RequirementImportance,
+      }));
+
+      return {
+        data: {
+          roleId: roleData.id,
+          roleName: roleData.name,
+          roleSlug: roleData.slug,
+          requirements,
+        },
+        error: null,
+      };
+    } catch (err) {
+      return { data: null, error: normalizeTaxonomyError(err) };
+    }
+  }
+
+  matchRoleRequirements(
+    roleId: string,
+    roleName: string,
+    roleSlug: string,
+    requirements: RoleSkillRequirement[],
+    resolvedOccurrences: EvidenceOccurrence[],
+    allCanonicalSkills?: { id: string; canonical_name: string }[]
+  ): RoleMatchResult {
+    const matched: MatchedRoleSkill[] = [];
+    const missing: MissingRoleSkill[] = [];
+    const additionalSkills: AdditionalSkill[] = [];
+    const unmatchedEvidence: EvidenceOccurrence[] = [];
+
+    // 1. Group occurrences by normalizedSkillId (ignoring nulls for now)
+    const groupedBySkill = new Map<string, EvidenceOccurrence[]>();
+
+    for (const occ of resolvedOccurrences) {
+      if (occ.normalizedSkillId === null) {
+        unmatchedEvidence.push(occ);
+        continue;
+      }
+
+      const current = groupedBySkill.get(occ.normalizedSkillId) || [];
+      current.push(occ);
+      groupedBySkill.set(occ.normalizedSkillId, current);
+    }
+
+    // 2. Evaluate requirements
+    const reqMap = new Map<string, RoleSkillRequirement>();
+    for (const req of requirements) {
+      reqMap.set(req.skillId, req);
+      const skillOccurrences = groupedBySkill.get(req.skillId);
+
+      if (skillOccurrences && skillOccurrences.length > 0) {
+        matched.push({
+          skillId: req.skillId,
+          canonicalName: req.canonicalName,
+          importance: req.importance,
+          occurrences: skillOccurrences,
+        });
+      } else {
+        missing.push({
+          skillId: req.skillId,
+          canonicalName: req.canonicalName,
+          importance: req.importance,
+        });
+      }
+    }
+
+    // 3. Handle additional skills (resolved but not required by role)
+    for (const [skillId, occs] of groupedBySkill.entries()) {
+      if (!reqMap.has(skillId)) {
+        // We know the skillId, but we might not have its canonicalName unless passed in.
+        // We do not force an N+1 query here. We just use what we have.
+        const canonical = allCanonicalSkills?.find((s) => s.id === skillId)?.canonical_name;
+        additionalSkills.push({
+          skillId,
+          canonicalName: canonical,
+          occurrences: occs,
+        });
+      }
+    }
+
+    return {
+      roleId,
+      roleName,
+      roleSlug,
+      matched,
+      missing,
+      additionalSkills,
+      unmatchedEvidence,
+    };
   }
 }
 
