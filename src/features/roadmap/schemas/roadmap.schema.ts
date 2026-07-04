@@ -24,3 +24,35 @@ export const rawRoadmapGenerationSchema = z.object({
 }).strict();
 
 export type RawRoadmapGeneration = z.infer<typeof rawRoadmapGenerationSchema>;
+
+// ============================================================================
+// Immutable Roadmap Plan Schema (Persistence Boundary)
+// ============================================================================
+
+export const roadmapTaskSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(['LEARN', 'PRACTICE', 'BUILD', 'VALIDATE']),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  skillSlug: z.string().min(1),
+  priority: z.enum(['high', 'medium', 'low']),
+  order: z.number().int().positive(),
+  rationale: z.string().min(1),
+  sourceGapIds: z.array(z.string().uuid()).min(1),
+}).strict();
+
+export const roadmapPhaseSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1),
+  objective: z.string().min(1),
+  order: z.number().int().positive(),
+  tasks: z.array(roadmapTaskSchema),
+}).strict();
+
+export const roadmapPlanSchema = z.object({
+  schemaVersion: z.literal('roadmap-plan-v1'),
+  roleSlug: z.string().min(1),
+  generatedAt: z.string().datetime(),
+  strategy: z.literal('deterministic-v1'),
+  phases: z.array(roadmapPhaseSchema),
+}).strict();

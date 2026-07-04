@@ -1,4 +1,5 @@
-import type { GapPriority } from '@/features/gaps/types/gap.types';
+import type { GapPriority, GapResult } from '@/features/gaps/types/gap.types';
+import type { RoleSkillRequirement } from '@/features/taxonomy/types/taxonomy.types';
 
 // ============================================================================
 // A. Raw AI generation output
@@ -34,7 +35,74 @@ export type RoadmapGenerationProvenance = {
 };
 
 // ============================================================================
-// C. Immutable roadmap version
+// C. Immutable roadmap plan contract
+// ============================================================================
+
+export const ROADMAP_PLAN_SCHEMA_VERSION = 'roadmap-plan-v1';
+
+export type RoadmapPlanSchemaVersion = typeof ROADMAP_PLAN_SCHEMA_VERSION;
+
+export type RoadmapPlanStrategy = 'deterministic-v1';
+
+export type RoadmapTaskType = 'LEARN' | 'PRACTICE' | 'BUILD' | 'VALIDATE';
+
+export type RoadmapPlan = {
+  readonly schemaVersion: RoadmapPlanSchemaVersion;
+  readonly roleSlug: string;
+  readonly generatedAt: string;
+  readonly strategy: RoadmapPlanStrategy;
+  readonly phases: readonly RoadmapPhase[];
+};
+
+// ============================================================================
+// D. Roadmap phase
+// ============================================================================
+
+export type RoadmapPhase = {
+  readonly id: string;
+  readonly title: string;
+  readonly objective: string;
+  readonly order: number;
+  readonly tasks: readonly RoadmapTask[];
+};
+
+// ============================================================================
+// E. Roadmap task
+// ============================================================================
+// id is application-generated and deterministic for stable semantic task identity.
+
+export type RoadmapTask = {
+  readonly id: string;
+  readonly type: RoadmapTaskType;
+  readonly title: string;
+  readonly description: string;
+  readonly skillSlug: string;
+  readonly priority: GapPriority;
+  readonly order: number;
+  readonly rationale: string;
+  readonly sourceGapIds: readonly string[];
+};
+
+// ============================================================================
+// F. Deterministic planner input
+// ============================================================================
+
+export type RoadmapTargetRole = {
+  readonly roleId: string;
+  readonly roleSlug: string;
+  readonly roleName?: string;
+};
+
+export type RoadmapPlannerInput = {
+  readonly targetRole: RoadmapTargetRole;
+  readonly gapResult: GapResult;
+  readonly roleRequirements: readonly RoleSkillRequirement[];
+  readonly generatedAt: string;
+  readonly strategy?: RoadmapPlanStrategy;
+};
+
+// ============================================================================
+// G. Immutable roadmap version
 // ============================================================================
 
 export type ImmutableRoadmapVersion = {
@@ -42,36 +110,12 @@ export type ImmutableRoadmapVersion = {
   readonly userId: string;
   readonly journeyId: string;
   readonly provenance: RoadmapGenerationProvenance;
-  readonly planData: readonly RoadmapModule[];
+  readonly planData: RoadmapPlan;
   readonly createdAt: string;
 };
 
 // ============================================================================
-// D. Roadmap module
-// ============================================================================
-
-export type RoadmapModule = {
-  readonly skillId: string;
-  readonly canonicalName: string;
-  readonly priority: GapPriority;
-  readonly priorityScore: number;
-  readonly tasks: readonly RoadmapTask[];
-};
-
-// ============================================================================
-// E. Roadmap task
-// ============================================================================
-// id is application-generated version-local UUID.
-// No cross-version identity semantics exist.
-
-export type RoadmapTask = {
-  readonly id: string;
-  readonly title: string;
-  readonly description: string;
-};
-
-// ============================================================================
-// F. Active pointer contract
+// H. Active pointer contract
 // ============================================================================
 
 export type RoadmapActivePointer = {
@@ -81,7 +125,7 @@ export type RoadmapActivePointer = {
 };
 
 // ============================================================================
-// G. Task progress contract
+// I. Task progress contract
 // ============================================================================
 
 export type RoadmapTaskProgress = {
