@@ -1,4 +1,4 @@
-import { supabase as globalSupabase } from '@/lib/supabase';
+import { supabase as globalSupabase } from '../../../lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   EvidenceOccurrence,

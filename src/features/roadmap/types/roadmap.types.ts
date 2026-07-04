@@ -1,5 +1,5 @@
-import type { GapPriority, GapResult } from '@/features/gaps/types/gap.types';
-import type { RoleSkillRequirement } from '@/features/taxonomy/types/taxonomy.types';
+import type { GapPriority, GapResult } from '../../gaps/types/gap.types';
+import type { RoleSkillRequirement } from '../../taxonomy/types/taxonomy.types';
 
 // ============================================================================
 // A. Raw AI generation output

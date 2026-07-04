@@ -1,8 +1,8 @@
-import type { GapPriority, SkillGap } from '@/features/gaps/types/gap.types';
+import type { GapPriority, SkillGap } from '../../gaps/types/gap.types';
 import type {
   RequirementImportance,
   RoleSkillRequirement,
-} from '@/features/taxonomy/types/taxonomy.types';
+} from '../../taxonomy/types/taxonomy.types';
 import { ROADMAP_PLAN_SCHEMA_VERSION } from '../types/roadmap.types';
 import type {
   RoadmapPhase,

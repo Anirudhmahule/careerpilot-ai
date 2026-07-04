@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "zod";
-import { roadmapPlanSchema } from "@/features/roadmap/schemas/roadmap.schema.ts";
+import { roadmapPlanSchema } from "../../../src/features/roadmap/schemas/roadmap.schema.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",

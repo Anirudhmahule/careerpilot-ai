@@ -1,11 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "zod";
-import { taxonomyService } from "@/features/taxonomy/services/taxonomy.service.ts";
-import { gapService } from "@/features/gaps/services/gap.service.ts";
-import { buildRoadmapPlan } from "@/features/roadmap/engine/roadmap-planner.ts";
-import { roadmapPlanSchema } from "@/features/roadmap/schemas/roadmap.schema.ts";
-import { fingerprintRoleRequirements, ROLE_REQUIREMENTS_FINGERPRINT_VERSION } from "@/features/roadmap/utils/role-requirements-fingerprint.ts";
-import type { ResumeAnalysisLike } from "@/features/taxonomy/types/taxonomy.types.ts";
+import { taxonomyService } from "../../../src/features/taxonomy/services/taxonomy.service.ts";
+import { gapService } from "../../../src/features/gaps/services/gap.service.ts";
+import { buildRoadmapPlan } from "../../../src/features/roadmap/engine/roadmap-planner.ts";
+import { roadmapPlanSchema } from "../../../src/features/roadmap/schemas/roadmap.schema.ts";
+import { fingerprintRoleRequirements, ROLE_REQUIREMENTS_FINGERPRINT_VERSION } from "../../../src/features/roadmap/utils/role-requirements-fingerprint.ts";
+import type { ResumeAnalysisLike } from "../../../src/features/taxonomy/types/taxonomy.types.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
