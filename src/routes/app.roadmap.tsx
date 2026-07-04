@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Check, ChevronDown, ChevronRight, Circle, Clock, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
 import { useJourney } from "@/features/journey/hooks/useJourney";
+import { isJourneyRole } from "@/features/journey/types/journey.types";
+import type { JourneyRole } from "@/features/journey/types/journey.types";
 import { useActiveRoadmap } from "@/features/roadmap/hooks/use-active-roadmap";
 import { useResume } from "@/features/resume/hooks/useResume";
 import { useAnalysis } from "@/features/analysis/hooks/useAnalysis";
@@ -15,7 +17,9 @@ export const Route = createFileRoute("/app/roadmap")({
 });
 
 function Roadmap() {
-  const { journey, isLoading: isJourneyLoading } = useJourney();
+  const { journey, isLoading: isJourneyLoading, updateJourney } = useJourney();
+  const [selectedUpdateRole, setSelectedUpdateRole] = useState<JourneyRole | "">("");
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const { latestResume, isLoading: isResumeLoading } = useResume();
   const { latestSnapshot, isLoading: isAnalysisLoading } = useAnalysis(latestResume?.id);
   const { roadmap, isLoading: isRoadmapLoading, error, mutateTaskStatus, mutationError, pendingTaskIds, isGenerating, generationError, generateRoadmap } = useActiveRoadmap(journey?.id);
@@ -24,7 +28,7 @@ function Roadmap() {
   const handleGenerate = async () => {
     if (!journey || !latestSnapshot) return;
     try {
-      const slug = journey.target_role.toLowerCase().replace(/\s+/g, '-');
+      const slug = journey.target_role.toLowerCase().replace(/\./g, '').replace(/\s+/g, '-');
       const roleReqs = await taxonomyService.getRoleRequirements(slug);
       if (roleReqs.error || !roleReqs.data) {
         alert("Failed to resolve role: " + (roleReqs.error?.message ?? "Unknown error"));
@@ -60,6 +64,47 @@ function Roadmap() {
         <div className="mt-8 rounded-xl border border-destructive/20 bg-destructive/10 p-5 text-destructive flex items-center gap-3">
           <AlertCircle className="h-5 w-5" />
           <p>{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (journey && !isJourneyRole(journey.target_role)) {
+    return (
+      <div className="mx-auto max-w-7xl">
+        <PageHeader eyebrow="Roadmap" title="Action Required" description="Your target role needs to be updated." />
+        <div className="mt-8 rounded-xl border border-border bg-card p-8 text-center flex flex-col items-center justify-center shadow-xs">
+          <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Unsupported Role</h3>
+          <p className="text-muted-foreground mb-6 max-w-md">
+            Your current journey target role is <strong className="text-foreground">{journey.target_role}</strong>. This is a legacy role that is no longer supported for Roadmap generation. Please update your target role to continue.
+          </p>
+          <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              value={selectedUpdateRole}
+              onChange={(e) => setSelectedUpdateRole(e.target.value as JourneyRole)}
+              disabled={isUpdatingRole}
+            >
+              <option value="" disabled>Select a supported role...</option>
+              <option value="Frontend Engineer">Frontend Engineer</option>
+              <option value="React Developer">React Developer</option>
+              <option value="Next.js Developer">Next.js Developer</option>
+            </select>
+            <button
+              onClick={async () => {
+                if (!selectedUpdateRole) return;
+                setIsUpdatingRole(true);
+                await updateJourney({ target_role: selectedUpdateRole });
+                setIsUpdatingRole(false);
+              }}
+              disabled={!selectedUpdateRole || isUpdatingRole}
+              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUpdatingRole ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Update Journey
+            </button>
+          </div>
         </div>
       </div>
     );
