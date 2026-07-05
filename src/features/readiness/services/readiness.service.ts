@@ -1,4 +1,4 @@
-import type { RoleMatchResult, RequirementImportance, MatchedRoleSkill } from '@/features/taxonomy/types/taxonomy.types';
+﻿import type { RoleMatchResult, RequirementImportance, MatchedRoleSkill } from '@/features/taxonomy/types/taxonomy.types';
 import type { ReadinessResult, ReadinessBand } from '../types/readiness.types';
 
 export class ReadinessService {
@@ -136,11 +136,11 @@ export class ReadinessService {
       band,
       requirementCoverage: {
         score: requirementCoverageScore,
-        explanation: `Matches ${matchedRequirementWeight} out of ${totalRequirementWeight} total requirement weight points.`,
+        explanation: `${matchedRequirementWeight} of ${totalRequirementWeight} weighted requirement points covered.`,
       },
       evidenceStrength: {
         score: evidenceStrengthScore,
-        explanation: `Blended evidence strength based on exact and contextual provenance for matched requirements.`,
+        explanation: `Evidence quality across matched requirements.`,
       },
       matchedRequirementCount: matchResult.matched.length,
       totalRequirementCount: matchResult.matched.length + matchResult.missing.length,

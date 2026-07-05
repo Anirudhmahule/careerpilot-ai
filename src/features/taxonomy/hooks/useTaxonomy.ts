@@ -40,6 +40,8 @@ export interface UseTaxonomyReturn {
   error: TaxonomyHookError | null;
   /** The ID of the snapshot that was used for taxonomy. */
   snapshotId: string | null;
+  /** The created_at timestamp of the snapshot used for taxonomy. */
+  snapshotCreatedAt: string | null;
   /** Manually trigger a reload. */
   refresh(): Promise<void>;
 }
@@ -50,6 +52,7 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlu
   const [occurrences, setOccurrences] = useState<EvidenceOccurrence[] | null>(null);
   const [matchResult, setMatchResult] = useState<RoleMatchResult | null>(null);
   const [snapshotId, setSnapshotId] = useState<string | null>(null);
+  const [snapshotCreatedAt, setSnapshotCreatedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<TaxonomyHookError | null>(null);
 
@@ -59,6 +62,7 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlu
     setOccurrences(null);
     setMatchResult(null);
     setSnapshotId(null);
+    setSnapshotCreatedAt(null);
 
     // 1. Fetch latest completed snapshot for this resume version
     const { data: snapshot, error: dbError } =
@@ -77,6 +81,7 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlu
     }
 
     setSnapshotId(snapshot.id);
+    setSnapshotCreatedAt(snapshot.created_at);
 
     // 2. Validate raw_response through ResumeAnalysisSchema (trust boundary)
     const validationResult = parseSnapshotRawResponse(
@@ -132,6 +137,7 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlu
       setOccurrences(null);
       setMatchResult(null);
       setSnapshotId(null);
+      setSnapshotCreatedAt(null);
       setError(null);
       setIsLoading(false);
       return;
@@ -146,5 +152,13 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlu
     }
   }, [resumeVersionId, roleSlug, load]);
 
-  return { occurrences, matchResult, isLoading, error, snapshotId, refresh };
+  return {
+    occurrences,
+    matchResult,
+    snapshotId,
+    snapshotCreatedAt,
+    isLoading,
+    error,
+    refresh,
+  };
 }
