@@ -176,6 +176,14 @@ const WarningSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Database Envelope Schema
+// ---------------------------------------------------------------------------
+
+export const AnalysisSnapshotEnvelopeSchema = z.object({
+  analysis: z.unknown(), // we defer deep validation to the canonical schema
+}).strict();
+
+// ---------------------------------------------------------------------------
 // Root domain schema — what gets stored in raw_response
 // ---------------------------------------------------------------------------
 
@@ -227,17 +235,24 @@ export function parseSnapshotRawResponse(
   if (rawResponse === null) {
     return {
       success: false,
-      error: { message: "Snapshot raw_response is null — analysis may not have completed." },
+      error: { message: "Snapshot raw_response is null - analysis may not have completed." },
     };
   }
 
-  const result = ResumeAnalysisSchema.safeParse(rawResponse);
+  // Handle runtime contract drift: some snapshots have the canonical payload
+  // nested under `.analysis`, others might have it at the root.
+  const envelopeResult = AnalysisSnapshotEnvelopeSchema.safeParse(rawResponse);
+  const canonicalPayload = envelopeResult.success
+    ? envelopeResult.data.analysis
+    : rawResponse;
+
+  const result = ResumeAnalysisSchema.safeParse(canonicalPayload);
 
   if (!result.success) {
     return {
       success: false,
       error: {
-        message: `Snapshot raw_response failed validation: ${result.error.message}`,
+        message: "We couldn't read this analysis snapshot because its data format is incompatible. Please regenerate the analysis or try again.",
         issues: result.error.issues,
       },
     };
