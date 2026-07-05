@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Check, ChevronDown, ChevronRight, Circle, Clock, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
 import { useJourney } from "@/features/journey/hooks/useJourney";
+import { supabase } from "@/lib/supabase";
 import { isJourneyRole } from "@/features/journey/types/journey.types";
 import type { JourneyRole } from "@/features/journey/types/journey.types";
 import { useActiveRoadmap } from "@/features/roadmap/hooks/use-active-roadmap";
@@ -29,7 +30,7 @@ function Roadmap() {
     if (!journey || !latestSnapshot) return;
     try {
       const slug = journey.target_role.toLowerCase().replace(/\./g, '').replace(/\s+/g, '-');
-      const roleReqs = await taxonomyService.getRoleRequirements(slug);
+      const roleReqs = await taxonomyService.getRoleRequirements(slug, supabase);
       if (roleReqs.error || !roleReqs.data) {
         alert("Failed to resolve role: " + (roleReqs.error?.message ?? "Unknown error"));
         return;
