@@ -66,7 +66,7 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlu
 
     // 1. Fetch latest completed snapshot for this resume version
     const { data: snapshot, error: dbError } =
-      await analysisService.getLatestSnapshotByResumeVersionId(versionId);
+      await analysisService.getLatestCompletedSnapshotByResumeVersionId(versionId);
 
     if (dbError) {
       setError({ message: dbError.message, code: dbError.code, stage: 'db' });

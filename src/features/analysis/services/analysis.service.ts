@@ -68,6 +68,12 @@ export interface IAnalysisService {
   getLatestSnapshotByResumeVersionId(resumeVersionId: string): Promise<AnalysisResult<AnalysisSnapshot>>;
 
   /**
+   * Fetch the most recent completed analysis snapshot for a resume version.
+   * Returns null data (not an error) when no completed snapshot exists yet.
+   */
+  getLatestCompletedSnapshotByResumeVersionId(resumeVersionId: string): Promise<AnalysisResult<AnalysisSnapshot>>;
+
+  /**
    * Fetch every analysis snapshot for a resume version, newest first.
    * Returns an empty array (not an error) when no snapshots exist yet.
    */
@@ -123,6 +129,29 @@ class AnalysisService implements IAnalysisService {
         .from(TABLE)
         .select("*")
         .eq("resume_version_id", resumeVersionId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        return { data: null, error: normalizeAnalysisError(error) };
+      }
+
+      return { data: (data as AnalysisSnapshot) ?? null, error: null };
+    } catch (err) {
+      return { data: null, error: normalizeAnalysisError(err) };
+    }
+  }
+
+  async getLatestCompletedSnapshotByResumeVersionId(
+    resumeVersionId: string,
+  ): Promise<AnalysisResult<AnalysisSnapshot>> {
+    try {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select("*")
+        .eq("resume_version_id", resumeVersionId)
+        .eq("status", "completed")
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();

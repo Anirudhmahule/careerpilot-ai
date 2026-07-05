@@ -14,6 +14,8 @@ export type AnalysisHookError = AnalysisServiceError;
 export interface UseAnalysisReturn {
     /** The most recent analysis snapshot for the tracked resume version, or null if none exists. */
     latestSnapshot: AnalysisSnapshot | null;
+    /** The most recent completed analysis snapshot for the tracked resume version, or null if none exists. */
+    latestCompletedSnapshot: AnalysisSnapshot | null;
     /** All analysis snapshots for the tracked resume version, newest first. */
     snapshots: AnalysisSnapshot[];
     /** True while the initial load or any action is in-flight. */
@@ -40,6 +42,7 @@ export interface UseAnalysisReturn {
 
 export function useAnalysis(resumeVersionId?: string): UseAnalysisReturn {
     const [latestSnapshot, setLatestSnapshot] = useState<AnalysisSnapshot | null>(null);
+    const [latestCompletedSnapshot, setLatestCompletedSnapshot] = useState<AnalysisSnapshot | null>(null);
     const [snapshots, setSnapshots] = useState<AnalysisSnapshot[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<AnalysisHookError | null>(null);
@@ -60,8 +63,9 @@ export function useAnalysis(resumeVersionId?: string): UseAnalysisReturn {
         setIsLoading(true);
         setError(null);
 
-        const [latestResult, allResult] = await Promise.all([
+        const [latestResult, latestCompletedResult, allResult] = await Promise.all([
             analysisService.getLatestSnapshotByResumeVersionId(versionId),
+            analysisService.getLatestCompletedSnapshotByResumeVersionId(versionId),
             analysisService.getAllSnapshotsByResumeVersionId(versionId),
         ]);
 
@@ -69,18 +73,16 @@ export function useAnalysis(resumeVersionId?: string): UseAnalysisReturn {
 
         if (latestResult.error) {
             setError(latestResult.error);
-            setIsLoading(false);
-            return;
-        }
-
-        if (allResult.error) {
+        } else if (latestCompletedResult.error) {
+            setError(latestCompletedResult.error);
+        } else if (allResult.error) {
             setError(allResult.error);
-            setIsLoading(false);
-            return;
+        } else {
+            setLatestSnapshot(latestResult.data);
+            setLatestCompletedSnapshot(latestCompletedResult.data);
+            setSnapshots(allResult.data || []);
         }
 
-        setLatestSnapshot(latestResult.data);
-        setSnapshots(allResult.data ?? []);
         setIsLoading(false);
     }, []);
 
@@ -157,6 +159,7 @@ export function useAnalysis(resumeVersionId?: string): UseAnalysisReturn {
 
     return {
         latestSnapshot,
+        latestCompletedSnapshot,
         snapshots,
         isLoading,
         error,

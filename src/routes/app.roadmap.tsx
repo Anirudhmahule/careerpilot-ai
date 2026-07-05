@@ -23,13 +23,13 @@ function Roadmap() {
   const [selectedUpdateRole, setSelectedUpdateRole] = useState<JourneyRole | "">("");
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
   const { latestResume, isLoading: isResumeLoading } = useResume();
-  const { latestSnapshot, isLoading: isAnalysisLoading } = useAnalysis(latestResume?.id);
+  const { latestCompletedSnapshot, isLoading: isAnalysisLoading } = useAnalysis(latestResume?.id);
   const { roadmap, isLoading: isRoadmapLoading, error, mutateTaskStatus, mutationError, pendingTaskIds, isGenerating, generationError, generateRoadmap } = useActiveRoadmap(journey?.id);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [localError, setLocalError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
-    if (!journey || !latestSnapshot) return;
+    if (!journey || !latestCompletedSnapshot) return;
     setLocalError(null);
     try {
       const roleMapping = mapTargetRoleToTaxonomySlug(journey.target_role);
@@ -42,7 +42,7 @@ function Roadmap() {
         setLocalError("Failed to resolve role: " + (roleReqs.error?.message ?? "Unknown error"));
         return;
       }
-      await generateRoadmap(latestSnapshot.id, roleReqs.data.roleId);
+      await generateRoadmap(latestCompletedSnapshot.id, roleReqs.data.roleId);
     } catch (err) {
       setLocalError("An error occurred trying to prepare roadmap generation.");
     }
@@ -119,7 +119,7 @@ function Roadmap() {
   }
 
   if (!roadmap) {
-    const hasAnalysis = latestSnapshot && latestSnapshot.status === 'completed';
+    const hasAnalysis = !!latestCompletedSnapshot;
 
     return (
       <div className="mx-auto max-w-7xl">
