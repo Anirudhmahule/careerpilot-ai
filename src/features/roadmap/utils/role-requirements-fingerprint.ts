@@ -1,4 +1,4 @@
-import type { RequirementImportance } from '../../taxonomy/types/taxonomy.types';
+import type { RequirementImportance } from '../../taxonomy/types/taxonomy.types.ts';
 
 export type RoleRequirementFingerprintInput = {
   readonly skillId: string;

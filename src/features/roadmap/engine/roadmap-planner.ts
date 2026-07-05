@@ -1,16 +1,16 @@
-import type { GapPriority, SkillGap } from '../../gaps/types/gap.types';
+import type { GapPriority, SkillGap } from '../../gaps/types/gap.types.ts';
 import type {
   RequirementImportance,
   RoleSkillRequirement,
-} from '../../taxonomy/types/taxonomy.types';
-import { ROADMAP_PLAN_SCHEMA_VERSION } from '../types/roadmap.types';
+} from '../../taxonomy/types/taxonomy.types.ts';
+import { ROADMAP_PLAN_SCHEMA_VERSION } from '../types/roadmap.types.ts';
 import type {
   RoadmapPhase,
   RoadmapPlan,
   RoadmapPlannerInput,
   RoadmapTask,
   RoadmapTaskType,
-} from '../types/roadmap.types';
+} from '../types/roadmap.types.ts';
 
 type PhaseKey = 'missing-role-skills';
 

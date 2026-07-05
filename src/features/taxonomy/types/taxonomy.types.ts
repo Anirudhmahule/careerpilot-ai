@@ -18,7 +18,7 @@ export interface TaxonomyResult<T = void> {
 }
 
 // Re-export the canonical ResumeAnalysis type for use in taxonomy consumers
-export type { ResumeAnalysis as ResumeAnalysisLike } from '../../../lib/resume-analysis.schema';
+export type { ResumeAnalysis as ResumeAnalysisLike } from '../../../lib/resume-analysis.schema.ts';
 
 export type RequirementImportance =
   | "required"

@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabase';
 /**
  * useTaxonomy
  *
@@ -95,7 +96,7 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: string): UseTax
 
     // 4. Alias resolution (2 batched DB queries max)
     const { data: resolved, error: taxonomyError } =
-      await taxonomyService.resolveEvidenceOccurrences(rawOccurrences);
+      await taxonomyService.resolveEvidenceOccurrences(rawOccurrences, supabase);
 
     if (taxonomyError || !resolved) {
       setError({ message: taxonomyError?.message || 'Resolution failed', code: taxonomyError?.code, stage: 'taxonomy' });
@@ -107,7 +108,7 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: string): UseTax
 
     // 5. Role Matching (if a role is provided)
     if (currentRoleSlug) {
-      const { data: roleReqs, error: roleError } = await taxonomyService.getRoleRequirements(currentRoleSlug);
+      const { data: roleReqs, error: roleError } = await taxonomyService.getRoleRequirements(currentRoleSlug, supabase);
       
       if (roleError || !roleReqs) {
         setError({ message: roleError?.message || 'Role requirements failed', code: roleError?.code, stage: 'role_match' });

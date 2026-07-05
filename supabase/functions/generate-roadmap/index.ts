@@ -205,7 +205,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Prepare fingerprint
-    const fingerprintInput = requirements.map(r => ({
+    const fingerprintInput = requirements.map((r: any) => ({
       skillId: r.skillId,
       importance: r.importance
     }));

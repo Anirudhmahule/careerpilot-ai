@@ -1,4 +1,3 @@
-import { supabase as globalSupabase } from '../../../lib/supabase';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   EvidenceOccurrence,
@@ -11,7 +10,7 @@ import type {
   MatchedRoleSkill,
   MissingRoleSkill,
   AdditionalSkill
-} from '../types/taxonomy.types';
+} from '../types/taxonomy.types.ts';
 
 // ─── Error normaliser ─────────────────────────────────────────────────────────
 
@@ -134,7 +133,7 @@ class TaxonomyService implements ITaxonomyService {
 
   async resolveEvidenceOccurrences(
     occurrences: EvidenceOccurrence[],
-    client: SupabaseClient = globalSupabase
+    client: SupabaseClient
   ): Promise<TaxonomyResult<EvidenceOccurrence[]>> {
     if (occurrences.length === 0) {
       return { data: [], error: null };
@@ -232,7 +231,7 @@ class TaxonomyService implements ITaxonomyService {
 
   async getRoleRequirements(
     roleSlug: string,
-    client: SupabaseClient = globalSupabase
+    client: SupabaseClient
   ): Promise<TaxonomyResult<{ roleId: string; roleName: string; roleSlug: string; requirements: RoleSkillRequirement[] }>> {
     const supportedRoles = ['frontend-engineer', 'react-developer', 'nextjs-developer'];
     if (!supportedRoles.includes(roleSlug)) {

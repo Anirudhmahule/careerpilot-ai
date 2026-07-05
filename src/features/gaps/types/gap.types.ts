@@ -14,7 +14,7 @@
  * No AI, no persistence, no estimation, no roadmap fields.
  */
 
-import type { RequirementImportance } from '../../taxonomy/types/taxonomy.types';
+import type { RequirementImportance } from '../../taxonomy/types/taxonomy.types.ts';
 
 // ─── Priority ─────────────────────────────────────────────────────────────────
 

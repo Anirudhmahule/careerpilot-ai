@@ -15,8 +15,8 @@
  * Sort order: high → medium → low, stable tie-break by canonicalName ascending.
  */
 
-import type { RoleMatchResult } from '../../taxonomy/types/taxonomy.types';
-import type { GapResult, GapPriority, GapSummary, SkillGap } from '../types/gap.types';
+import type { RoleMatchResult } from '../../taxonomy/types/taxonomy.types.ts';
+import type { GapResult, GapPriority, GapSummary, SkillGap } from '../types/gap.types.ts';
 
 // ─── Service interface ────────────────────────────────────────────────────────
 
