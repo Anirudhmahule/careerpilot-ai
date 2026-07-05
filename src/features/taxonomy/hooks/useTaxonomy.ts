@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { analysisService } from '@/features/analysis/services/analysis.service';
 import { taxonomyService } from '@/features/taxonomy/services/taxonomy.service';
 import { parseSnapshotRawResponse } from '@/lib/resume-analysis.schema';
-import type { EvidenceOccurrence, RoleMatchResult } from '@/features/taxonomy/types/taxonomy.types';
+import type { EvidenceOccurrence, RoleMatchResult, TaxonomyRoleSlug } from '@/features/taxonomy/types/taxonomy.types';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -46,14 +46,14 @@ export interface UseTaxonomyReturn {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useTaxonomy(resumeVersionId?: string, roleSlug?: string): UseTaxonomyReturn {
+export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlug): UseTaxonomyReturn {
   const [occurrences, setOccurrences] = useState<EvidenceOccurrence[] | null>(null);
   const [matchResult, setMatchResult] = useState<RoleMatchResult | null>(null);
   const [snapshotId, setSnapshotId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<TaxonomyHookError | null>(null);
 
-  const load = useCallback(async (versionId: string, currentRoleSlug?: string): Promise<void> => {
+  const load = useCallback(async (versionId: string, currentRoleSlug?: TaxonomyRoleSlug): Promise<void> => {
     setIsLoading(true);
     setError(null);
     setOccurrences(null);

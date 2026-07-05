@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/app-shell";
 import { useJourney } from "@/features/journey/hooks/useJourney";
 import { supabase } from "@/lib/supabase";
 import { isJourneyRole } from "@/features/journey/types/journey.types";
+import { mapTargetRoleToTaxonomySlug } from "@/features/taxonomy/utils/role-mapping";
 import type { JourneyRole } from "@/features/journey/types/journey.types";
 import { useActiveRoadmap } from "@/features/roadmap/hooks/use-active-roadmap";
 import { useResume } from "@/features/resume/hooks/useResume";
@@ -25,19 +26,25 @@ function Roadmap() {
   const { latestSnapshot, isLoading: isAnalysisLoading } = useAnalysis(latestResume?.id);
   const { roadmap, isLoading: isRoadmapLoading, error, mutateTaskStatus, mutationError, pendingTaskIds, isGenerating, generationError, generateRoadmap } = useActiveRoadmap(journey?.id);
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
     if (!journey || !latestSnapshot) return;
+    setLocalError(null);
     try {
-      const slug = journey.target_role.toLowerCase().replace(/\./g, '').replace(/\s+/g, '-');
+      const roleMapping = mapTargetRoleToTaxonomySlug(journey.target_role);
+      if (!roleMapping.supported) {
+        return;
+      }
+      const slug = roleMapping.slug;
       const roleReqs = await taxonomyService.getRoleRequirements(slug, supabase);
       if (roleReqs.error || !roleReqs.data) {
-        alert("Failed to resolve role: " + (roleReqs.error?.message ?? "Unknown error"));
+        setLocalError("Failed to resolve role: " + (roleReqs.error?.message ?? "Unknown error"));
         return;
       }
       await generateRoadmap(latestSnapshot.id, roleReqs.data.roleId);
     } catch (err) {
-      alert("An error occurred trying to prepare roadmap generation.");
+      setLocalError("An error occurred trying to prepare roadmap generation.");
     }
   };
 
@@ -118,10 +125,10 @@ function Roadmap() {
       <div className="mx-auto max-w-7xl">
         <PageHeader eyebrow="Roadmap" title="No Roadmap Generated" description="You haven't generated a roadmap for this journey yet." />
         <div className="mt-8 rounded-xl border border-border bg-card p-8 text-center flex flex-col items-center justify-center shadow-xs">
-          {generationError && (
+          {(generationError || localError) && (
             <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              {generationError.message}
+              {generationError?.message || localError}
             </div>
           )}
 
@@ -175,10 +182,10 @@ function Roadmap() {
         </div>
       )}
 
-      {generationError && (
+      {(generationError || localError) && (
         <div className="mb-6 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <p>{generationError.message}</p>
+          <p>{generationError?.message || localError}</p>
         </div>
       )}
 

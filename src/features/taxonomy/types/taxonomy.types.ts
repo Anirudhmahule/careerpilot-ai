@@ -1,3 +1,5 @@
+export type TaxonomyRoleSlug = 'frontend-engineer' | 'react-developer' | 'nextjs-developer';
+
 export interface EvidenceOccurrence {
   rawName: string;
   normalizedSkillId: string | null;

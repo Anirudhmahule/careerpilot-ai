@@ -9,7 +9,8 @@ import type {
   RequirementImportance,
   MatchedRoleSkill,
   MissingRoleSkill,
-  AdditionalSkill
+  AdditionalSkill,
+  TaxonomyRoleSlug
 } from '../types/taxonomy.types.ts';
 
 // ─── Error normaliser ─────────────────────────────────────────────────────────
@@ -54,7 +55,7 @@ export interface ITaxonomyService {
    * Rejects unsupported/legacy roles.
    */
   getRoleRequirements(
-    roleSlug: string,
+    roleSlug: TaxonomyRoleSlug,
     client?: SupabaseClient
   ): Promise<TaxonomyResult<{ roleId: string; roleName: string; roleSlug: string; requirements: RoleSkillRequirement[] }>>;
 
@@ -230,7 +231,7 @@ class TaxonomyService implements ITaxonomyService {
   }
 
   async getRoleRequirements(
-    roleSlug: string,
+    roleSlug: TaxonomyRoleSlug,
     client: SupabaseClient
   ): Promise<TaxonomyResult<{ roleId: string; roleName: string; roleSlug: string; requirements: RoleSkillRequirement[] }>> {
     const supportedRoles = ['frontend-engineer', 'react-developer', 'nextjs-developer'];

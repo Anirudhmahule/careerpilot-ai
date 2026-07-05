@@ -10,6 +10,7 @@ import { useReadiness } from "@/features/readiness/hooks/useReadiness";
 import type { UseReadinessReturn } from "@/features/readiness/hooks/useReadiness";
 import { useGaps } from "@/features/gaps/hooks/useGaps";
 import type { UseGapsReturn } from "@/features/gaps/hooks/useGaps";
+import { mapTargetRoleToTaxonomySlug } from "@/features/taxonomy/utils/role-mapping";
 
 export const Route = createFileRoute("/app/insights")({
   head: () => ({ meta: [{ title: "Insights — CareerPilot AI" }] }),
@@ -26,11 +27,37 @@ function Insights() {
   const { journey } = useJourney();
 
   // Convert target_role to slug if possible (e.g. "Frontend Engineer" -> "frontend-engineer")
-  const roleSlug = journey?.target_role ? journey.target_role.toLowerCase().replace(/ /g, '-').replace(/\./g, '') : undefined;
+  const roleMapping = mapTargetRoleToTaxonomySlug(journey?.target_role);
+  const roleSlug = roleMapping.supported ? roleMapping.slug : undefined;
 
   const taxonomy = useTaxonomy(latestResume?.id, roleSlug);
   const readiness = useReadiness(taxonomy.matchResult);
   const gaps = useGaps(taxonomy.matchResult);
+
+  if (!roleMapping.supported && journey?.target_role) {
+    return (
+      <div className="mx-auto max-w-7xl">
+        <PageHeader
+          eyebrow="Insights"
+          title={`Where you stand for ${journey.target_role}`}
+          description="Score, breakdown, skills, gaps and role fit — all on one page."
+        />
+        <div className="mt-8 flex flex-col items-center justify-center rounded-xl border border-border bg-card p-12 text-center shadow-xs">
+          <AlertTriangle className="h-12 w-12 text-warning" />
+          <h2 className="mt-4 text-lg font-medium">Role not supported yet</h2>
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
+            Deep insights and taxonomy resolution are not yet available for legacy or unsupported roles like "{roleMapping.role}". Please select a supported role (e.g., Frontend Engineer) to view your insights.
+          </p>
+          <Link
+            to="/app/journey"
+            className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Update Journey
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl">
