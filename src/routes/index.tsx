@@ -813,15 +813,15 @@ function Footer() {
             The career operating system for software engineers.
           </p>
           <div className="mt-4 flex items-center gap-2 text-muted-foreground">
-            <a href="#" className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground">
+            <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub" className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground">
               <Github className="h-4 w-4" />
             </a>
-            <a href="#" className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground">
+            <span aria-label="Fast" className="grid h-8 w-8 place-items-center rounded-md border border-border">
               <Zap className="h-4 w-4" />
-            </a>
-            <a href="#" className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground">
+            </span>
+            <span aria-label="Secure" className="grid h-8 w-8 place-items-center rounded-md border border-border">
               <ShieldCheck className="h-4 w-4" />
-            </a>
+            </span>
           </div>
         </div>
         {[
@@ -834,7 +834,7 @@ function Footer() {
             <ul className="mt-3 space-y-2">
               {col.l.map((x) => (
                 <li key={x}>
-                  <a href="#" className="text-foreground/80 hover:text-foreground">{x}</a>
+                  <span className="text-foreground/80">{x}</span>
                 </li>
               ))}
             </ul>

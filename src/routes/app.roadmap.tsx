@@ -1,88 +1,238 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check, ChevronDown, ChevronRight, Circle, Clock, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Check, ChevronDown, ChevronRight, Circle, Clock, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
+import { useJourney } from "@/features/journey/hooks/useJourney";
+import { supabase } from "@/lib/supabase";
+import { isJourneyRole } from "@/features/journey/types/journey.types";
+import { mapTargetRoleToTaxonomySlug } from "@/features/taxonomy/utils/role-mapping";
+import type { JourneyRole } from "@/features/journey/types/journey.types";
+import { useActiveRoadmap } from "@/features/roadmap/hooks/use-active-roadmap";
+import { useResume } from "@/features/resume/hooks/useResume";
+import { useAnalysis } from "@/features/analysis/hooks/useAnalysis";
+import { taxonomyService } from "@/features/taxonomy/services/taxonomy.service";
+import { validationService } from "@/features/validation/services/validation.service";
+import type { RoadmapPhaseView, RoadmapTaskView } from "@/features/roadmap/types/roadmap-view.types";
 
 export const Route = createFileRoute("/app/roadmap")({
   head: () => ({ meta: [{ title: "Roadmap — CareerPilot AI" }] }),
   component: Roadmap,
 });
 
-type Task = { t: string; m: string; done?: boolean };
-type Mod = { name: string; pct: number; tasks: Task[] };
-type Sprint = { name: string; range: string; modules: Mod[]; pct: number; status: "Done" | "Active" | "Upcoming" };
-
-const data: Sprint[] = [
-  {
-    name: "Sprint 1 · Foundations",
-    range: "Weeks 1–3",
-    pct: 100,
-    status: "Done",
-    modules: [
-      { name: "TypeScript deep dive", pct: 100, tasks: [{ t: "Generics & constraints", m: "1h", done: true }, { t: "Conditional types", m: "1h", done: true }] },
-      { name: "Modern React patterns", pct: 100, tasks: [{ t: "Compound components", m: "45m", done: true }, { t: "Suspense & transitions", m: "1h", done: true }] },
-    ],
-  },
-  {
-    name: "Sprint 2 · Architecture",
-    range: "Weeks 4–6",
-    pct: 64,
-    status: "Active",
-    modules: [
-      { name: "Component design", pct: 90, tasks: [{ t: "API design heuristics", m: "1h", done: true }, { t: "Props, slots, polymorphism", m: "45m", done: true }, { t: "Refactor: Form library", m: "2h" }] },
-      { name: "State management", pct: 50, tasks: [{ t: "Local vs server state", m: "30m", done: true }, { t: "Zustand patterns", m: "1h" }, { t: "URL as state", m: "45m" }] },
-      { name: "Data fetching", pct: 40, tasks: [{ t: "TanStack Query mental model", m: "1h", done: true }, { t: "Mutations & cache", m: "1h" }, { t: "Optimistic UI", m: "45m" }] },
-    ],
-  },
-  {
-    name: "Sprint 3 · System design",
-    range: "Weeks 7–9",
-    pct: 18,
-    status: "Upcoming",
-    modules: [
-      { name: "Frontend at scale", pct: 25, tasks: [{ t: "Module federation", m: "1h" }, { t: "Monorepos & boundaries", m: "1h" }] },
-      { name: "Caching & performance", pct: 10, tasks: [{ t: "HTTP caching", m: "45m" }, { t: "Lighthouse budgets", m: "45m" }] },
-    ],
-  },
-  {
-    name: "Sprint 4 · Interview prep",
-    range: "Weeks 10–11",
-    pct: 0,
-    status: "Upcoming",
-    modules: [
-      { name: "Behavioral · STAR", pct: 0, tasks: [{ t: "Story bank", m: "1h" }] },
-      { name: "Live coding patterns", pct: 0, tasks: [{ t: "Mock: design a debouncer", m: "45m" }] },
-    ],
-  },
-];
-
 function Roadmap() {
-  const [open, setOpen] = useState<Record<string, boolean>>({ "Sprint 2 · Architecture": true });
+  const { journey, isLoading: isJourneyLoading, updateJourney } = useJourney();
+  const [selectedUpdateRole, setSelectedUpdateRole] = useState<JourneyRole | "">("");
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const { latestResume, isLoading: isResumeLoading } = useResume();
+  const { latestCompletedSnapshot, isLoading: isAnalysisLoading } = useAnalysis(latestResume?.id);
+  const { roadmap, isLoading: isRoadmapLoading, error, mutateTaskStatus, mutationError, pendingTaskIds, isGenerating, generationError, generateRoadmap } = useActiveRoadmap(journey?.id);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [latestValidationCompletedAt, setLatestValidationCompletedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (latestCompletedSnapshot?.id) {
+      validationService.getLatestCompletedGeneration(latestCompletedSnapshot.id).then(({ data }) => {
+        if (data) {
+          setLatestValidationCompletedAt(data.completed_at || null);
+        }
+      });
+    }
+  }, [latestCompletedSnapshot?.id]);
+
+  const validationCompletedAfterRoadmap =
+    latestValidationCompletedAt !== null &&
+    roadmap !== null &&
+    new Date(latestValidationCompletedAt) > new Date(roadmap.generatedAt);
+
+  const handleGenerate = async () => {
+    if (!journey || !latestCompletedSnapshot) return;
+    setLocalError(null);
+    try {
+      const roleMapping = mapTargetRoleToTaxonomySlug(journey.target_role);
+      if (!roleMapping.supported) {
+        return;
+      }
+      const slug = roleMapping.slug;
+      const roleReqs = await taxonomyService.getRoleRequirements(slug, supabase);
+      if (roleReqs.error || !roleReqs.data) {
+        setLocalError("Failed to resolve role: " + (roleReqs.error?.message ?? "Unknown error"));
+        return;
+      }
+      await generateRoadmap(latestCompletedSnapshot.id, roleReqs.data.roleId);
+    } catch (err) {
+      setLocalError("An error occurred trying to prepare roadmap generation.");
+    }
+  };
+
+  if (isJourneyLoading || isResumeLoading || isAnalysisLoading || isRoadmapLoading) {
+    return (
+      <div className="mx-auto max-w-7xl">
+        <PageHeader eyebrow="Roadmap" title="Your personalized learning plan." description="Loading your roadmap..." />
+        <div className="mt-8 flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+      </div>
+    );
+  }
+
+  if (!journey) {
+    return (
+      <div className="mx-auto max-w-7xl">
+        <PageHeader eyebrow="Roadmap" title="No Journey Found" description="Please create a journey to view your roadmap." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-7xl">
+        <PageHeader eyebrow="Roadmap" title="Error Loading Roadmap" description="There was an error retrieving your roadmap." />
+        <div className="mt-8 rounded-xl border border-destructive/20 bg-destructive/10 p-5 text-destructive flex items-center gap-3">
+          <AlertCircle className="h-5 w-5" />
+          <p>{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (journey && !isJourneyRole(journey.target_role)) {
+    return (
+      <div className="mx-auto max-w-7xl">
+        <PageHeader eyebrow="Roadmap" title="Action Required" description="Your target role needs to be updated." />
+        <div className="mt-8 rounded-xl border border-border bg-card p-8 text-center flex flex-col items-center justify-center shadow-xs">
+          <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Unsupported Role</h3>
+          <p className="text-muted-foreground mb-6 max-w-md">
+            Your current journey target role is <strong className="text-foreground">{journey.target_role}</strong>. This is a legacy role that is no longer supported for Roadmap generation. Please update your target role to continue.
+          </p>
+          <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              value={selectedUpdateRole}
+              onChange={(e) => setSelectedUpdateRole(e.target.value as JourneyRole)}
+              disabled={isUpdatingRole}
+            >
+              <option value="" disabled>Select a supported role...</option>
+              <option value="Frontend Engineer">Frontend Engineer</option>
+              <option value="React Developer">React Developer</option>
+              <option value="Next.js Developer">Next.js Developer</option>
+            </select>
+            <button
+              onClick={async () => {
+                if (!selectedUpdateRole) return;
+                setIsUpdatingRole(true);
+                await updateJourney({ target_role: selectedUpdateRole });
+                setIsUpdatingRole(false);
+              }}
+              disabled={!selectedUpdateRole || isUpdatingRole}
+              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUpdatingRole ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Update Journey
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!roadmap) {
+    const hasAnalysis = !!latestCompletedSnapshot;
+
+    return (
+      <div className="mx-auto max-w-7xl">
+        <PageHeader eyebrow="Roadmap" title="No Roadmap Generated" description="You haven't generated a roadmap for this journey yet." />
+        <div className="mt-8 rounded-xl border border-border bg-card p-8 text-center flex flex-col items-center justify-center shadow-xs">
+          {(generationError || localError) && (
+            <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              {generationError?.message || localError}
+            </div>
+          )}
+
+          <p className="text-muted-foreground mb-6">
+            {hasAnalysis
+              ? "Your resume analysis is complete. Generate your personalized roadmap to get started."
+              : "You need a completed resume analysis to generate a roadmap. Please upload and analyze your resume first."}
+          </p>
+
+          {hasAnalysis && (
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {isGenerating ? "Generating..." : "Generate Roadmap"}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="mx-auto max-w-7xl">
       <PageHeader
         eyebrow="Roadmap"
         title="Your personalized learning plan."
-        description="4 sprints · 11 weeks · calibrated for 2 hrs / day."
+        description={`Target Role: ${roadmap.roleSlug} · Generated ${new Date(roadmap.generatedAt).toLocaleDateString()}`}
         actions={
           <>
-            <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs hover:bg-accent">
+            <button className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs text-muted-foreground hover:bg-accent cursor-not-allowed" disabled title="Export is not yet supported">
               Export plan
             </button>
-            <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90">
-              <Sparkles className="h-3.5 w-3.5" /> Regenerate
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+              {isGenerating ? "Regenerating..." : "Regenerate"}
             </button>
           </>
         }
       />
 
+      {mutationError && (
+        <div className="mb-6 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <p>{mutationError.message}</p>
+        </div>
+      )}
+
+      {(generationError || localError) && (
+        <div className="mb-6 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <p>{generationError?.message || localError}</p>
+        </div>
+      )}
+
+      {validationCompletedAfterRoadmap && (
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm shadow-xs">
+          <div className="flex items-start gap-3">
+            <Sparkles className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+            <div>
+              <p className="font-medium text-foreground">Your skill profile has changed.</p>
+              <p className="text-muted-foreground">This roadmap was generated before you completed your skills validation. Regenerate it to include your updated skills.</p>
+            </div>
+          </div>
+          <button
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className="shrink-0 inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-4 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {isGenerating ? "Regenerating..." : "Regenerate Roadmap"}
+          </button>
+        </div>
+      )}
+
       {/* Overview header */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          ["Sprints", "4"],
-          ["Modules", "11"],
-          ["Tasks", "47"],
-          ["Est. hours", "82"],
+          ["Phases", roadmap.phases.length.toString()],
+          ["Tasks", roadmap.totalTasks.toString()],
+          ["Completed", (roadmap.doneTasks + roadmap.skippedTasks).toString()],
+          ["Progress", `${roadmap.completionPercentage}%`],
         ].map(([k, v]) => (
           <div key={k} className="rounded-xl border border-border bg-card p-4 shadow-xs">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{k}</div>
@@ -91,38 +241,37 @@ function Roadmap() {
         ))}
       </div>
 
-      {/* Timeline */}
+      {/* Timeline Placeholder - omitted because phases don't map to strict weeks in the backend yet */}
       <div className="mb-6 rounded-xl border border-border bg-card p-5 shadow-xs">
-        <div className="text-xs font-medium">Timeline</div>
-        <div className="mt-4 grid grid-cols-11 gap-1">
-          {Array.from({ length: 11 }).map((_, i) => {
-            const sprintIdx = i < 3 ? 0 : i < 6 ? 1 : i < 9 ? 2 : 3;
-            const s = data[sprintIdx];
-            const tone =
-              s.status === "Done" ? "bg-success" : s.status === "Active" ? "bg-primary" : "bg-border";
-            return (
-              <div key={i} className="flex flex-col items-center gap-1.5">
-                <div className={"h-2 w-full rounded-full " + tone} />
-                <span className="text-[10px] text-muted-foreground">W{i + 1}</span>
-              </div>
-            );
-          })}
+        <div className="flex items-center justify-between">
+            <div className="text-xs font-medium">Overall Progress</div>
+            <span className="text-xs font-semibold">{roadmap.completionPercentage}%</span>
+        </div>
+        <div className="mt-3 h-2 w-full rounded-full bg-border overflow-hidden">
+            <div className="h-full bg-success transition-all duration-500" style={{ width: `${roadmap.completionPercentage}%` }} />
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
           <Legend dot="bg-success" label="Completed" />
-          <Legend dot="bg-primary" label="Active" />
-          <Legend dot="bg-border" label="Upcoming" />
+          <Legend dot="bg-border" label="Pending" />
         </div>
       </div>
 
-      {/* Sprints */}
+      {/* Phases */}
       <div className="space-y-3">
-        {data.map((s) => {
-          const isOpen = !!open[s.name];
+        {roadmap.phases.map((phase) => {
+          const isOpen = open[phase.id] ?? true; // default open
+          const phaseTotal = phase.tasks.length;
+          const phaseCompleted = phase.tasks.filter(t => t.status !== 'PENDING').length;
+          const phasePct = phaseTotal === 0 ? 0 : Math.round((phaseCompleted / phaseTotal) * 100);
+
+          let statusText: 'Done' | 'Active' | 'Upcoming' = 'Upcoming';
+          if (phasePct === 100) statusText = 'Done';
+          else if (phasePct > 0) statusText = 'Active';
+
           return (
-            <section key={s.name} className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+            <section key={phase.id} className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
               <button
-                onClick={() => setOpen((o) => ({ ...o, [s.name]: !isOpen }))}
+                onClick={() => setOpen((o) => ({ ...o, [phase.id]: !isOpen }))}
                 className="grid w-full grid-cols-12 items-center gap-4 px-5 py-4 text-left hover:bg-accent/30"
               >
                 <div className="col-span-12 flex items-center gap-3 md:col-span-5">
@@ -130,54 +279,69 @@ function Roadmap() {
                     {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                   </span>
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold">{s.name}</div>
-                    <div className="text-[11px] text-muted-foreground">{s.range} · {s.modules.length} modules</div>
+                    <div className="truncate text-sm font-semibold">{phase.title}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{phase.objective}</div>
                   </div>
                 </div>
                 <div className="col-span-12 md:col-span-4">
-                  <StatusBadge s={s.status} />
+                  <StatusBadge s={statusText} />
                 </div>
                 <div className="col-span-12 md:col-span-3">
                   <div className="flex items-center justify-end gap-3">
                     <div className="h-1.5 w-32 overflow-hidden rounded-full bg-border">
                       <div
-                        className={"h-full rounded-full " + (s.status === "Done" ? "bg-success" : "bg-primary")}
-                        style={{ width: `${s.pct}%` }}
+                        className={"h-full rounded-full " + (statusText === "Done" ? "bg-success" : "bg-primary")}
+                        style={{ width: `${phasePct}%` }}
                       />
                     </div>
-                    <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">{s.pct}%</span>
+                    <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">{phasePct}%</span>
                   </div>
                 </div>
               </button>
 
               {isOpen && (
-                <div className="grid gap-3 border-t border-border bg-surface/50 p-5 md:grid-cols-2">
-                  {s.modules.map((m) => (
-                    <div key={m.name} className="rounded-lg border border-border bg-card p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium">{m.name}</div>
-                        <span className="text-[10px] tabular-nums text-muted-foreground">{m.pct}%</span>
-                      </div>
-                      <div className="mt-2 h-1 rounded-full bg-border">
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${m.pct}%` }} />
-                      </div>
-                      <ul className="mt-3 space-y-1.5">
-                        {m.tasks.map((t) => (
-                          <li key={t.t} className="flex items-center gap-2 text-sm">
-                            {t.done ? (
-                              <Check className="h-3.5 w-3.5 text-success" />
-                            ) : (
-                              <Circle className="h-3.5 w-3.5 text-muted-foreground" />
-                            )}
-                            <span className={"flex-1 " + (t.done ? "text-muted-foreground line-through" : "")}>{t.t}</span>
-                            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-                              <Clock className="h-3 w-3" /> {t.m}
-                            </span>
-                          </li>
-                        ))}
+                <div className="border-t border-border bg-surface/50 p-5">
+                    <div className="rounded-lg border border-border bg-card p-4">
+                      <ul className="space-y-2">
+                        {phase.tasks.map((t) => {
+                          const isDone = t.status === 'DONE' || t.status === 'SKIPPED';
+                          const isSkipped = t.status === 'SKIPPED';
+                          const isPendingMutation = pendingTaskIds.has(t.id);
+
+                          return (
+                            <li key={t.id} className="flex">
+                              <button
+                                disabled={isPendingMutation || isSkipped}
+                                onClick={() => {
+                                  if (!isSkipped) {
+                                    mutateTaskStatus(t.id, t.status === 'DONE' ? 'PENDING' : 'DONE');
+                                  }
+                                }}
+                                aria-label={isDone ? `Mark task ${t.title} as incomplete` : `Mark task ${t.title} as complete`}
+                                className="flex w-full items-start gap-3 text-sm p-2 rounded-md hover:bg-accent/30 text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <div className="mt-0.5 shrink-0">
+                                  {isPendingMutation ? (
+                                    <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                                  ) : isDone ? (
+                                    <Check className="h-4 w-4 text-success" />
+                                  ) : (
+                                    <Circle className="h-4 w-4 text-muted-foreground" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className={"font-medium " + (isDone ? "text-muted-foreground line-through" : "")}>{t.title}</div>
+                                  <div className="text-xs text-muted-foreground mt-0.5">{t.description}</div>
+                                </div>
+                                <span className="shrink-0 inline-flex items-center gap-1 text-[10px] uppercase font-semibold text-muted-foreground border border-border px-1.5 py-0.5 rounded-sm">
+                                  {t.type}
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
-                  ))}
                 </div>
               )}
             </section>
@@ -188,7 +352,7 @@ function Roadmap() {
   );
 }
 
-function StatusBadge({ s }: { s: Sprint["status"] }) {
+function StatusBadge({ s }: { s: 'Done' | 'Active' | 'Upcoming' }) {
   const cls =
     s === "Done"
       ? "bg-success/10 text-success"
