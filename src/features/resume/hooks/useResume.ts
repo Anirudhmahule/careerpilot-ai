@@ -185,11 +185,6 @@ export function useResume(): UseResumeReturn {
             }
 
             // Step 2: Only remove the DB record once storage deletion succeeds.
-            // TODO:
-            // Storage deletion and database deletion are performed separately.
-            // If the database delete fails after storage succeeds, the metadata row
-            // becomes orphaned. Consider moving deletion into a server-side endpoint
-            // or Supabase Edge Function so both operations can be coordinated.
             const { error: dbError } = await resumeService.deleteResume(resumeId);
 
             if (!mountedRef.current) return null;

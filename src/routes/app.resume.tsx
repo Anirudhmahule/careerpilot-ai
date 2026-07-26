@@ -68,8 +68,7 @@ function Resume() {
         });
 
       void navigate({
-        to: "/app/analysis",
-        search: { snapshotId: snapshot.id, fileName: latestResume.file_name },
+        to: "/app/insights"
       });
     }
   }
@@ -115,11 +114,10 @@ function Resume() {
           )}
 
           <Link
-            to="/app/analysis"
-            search={{ snapshotId: undefined, fileName: undefined }}
+            to="/app/insights"
             className="mt-4 inline-flex items-center gap-1 text-xs text-primary hover:underline"
           >
-            Skip upload, see analysis demo <ArrowRight className="h-3 w-3" />
+            Skip upload, see insights <ArrowRight className="h-3 w-3" />
           </Link>
         </section>
 
