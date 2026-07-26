@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, ChevronDown, ChevronRight, Circle, Clock, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
 import { useJourney } from "@/features/journey/hooks/useJourney";
@@ -11,6 +11,7 @@ import { useActiveRoadmap } from "@/features/roadmap/hooks/use-active-roadmap";
 import { useResume } from "@/features/resume/hooks/useResume";
 import { useAnalysis } from "@/features/analysis/hooks/useAnalysis";
 import { taxonomyService } from "@/features/taxonomy/services/taxonomy.service";
+import { validationService } from "@/features/validation/services/validation.service";
 import type { RoadmapPhaseView, RoadmapTaskView } from "@/features/roadmap/types/roadmap-view.types";
 
 export const Route = createFileRoute("/app/roadmap")({
@@ -27,6 +28,22 @@ function Roadmap() {
   const { roadmap, isLoading: isRoadmapLoading, error, mutateTaskStatus, mutationError, pendingTaskIds, isGenerating, generationError, generateRoadmap } = useActiveRoadmap(journey?.id);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [localError, setLocalError] = useState<string | null>(null);
+  const [latestValidationCompletedAt, setLatestValidationCompletedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (latestCompletedSnapshot?.id) {
+      validationService.getLatestCompletedGeneration(latestCompletedSnapshot.id).then(({ data }) => {
+        if (data) {
+          setLatestValidationCompletedAt(data.completed_at || null);
+        }
+      });
+    }
+  }, [latestCompletedSnapshot?.id]);
+
+  const validationCompletedAfterRoadmap =
+    latestValidationCompletedAt !== null &&
+    roadmap !== null &&
+    new Date(latestValidationCompletedAt) > new Date(roadmap.generatedAt);
 
   const handleGenerate = async () => {
     if (!journey || !latestCompletedSnapshot) return;
@@ -186,6 +203,26 @@ function Roadmap() {
         <div className="mb-6 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive flex items-center gap-3">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <p>{generationError?.message || localError}</p>
+        </div>
+      )}
+
+      {validationCompletedAfterRoadmap && (
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm shadow-xs">
+          <div className="flex items-start gap-3">
+            <Sparkles className="mt-0.5 h-4 w-4 text-primary shrink-0" />
+            <div>
+              <p className="font-medium text-foreground">Your skill profile has changed.</p>
+              <p className="text-muted-foreground">This roadmap was generated before you completed your skills validation. Regenerate it to include your updated skills.</p>
+            </div>
+          </div>
+          <button
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className="shrink-0 inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-4 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            {isGenerating ? "Regenerating..." : "Regenerate Roadmap"}
+          </button>
         </div>
       )}
 

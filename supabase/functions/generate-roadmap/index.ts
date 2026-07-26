@@ -4,6 +4,7 @@ import { taxonomyService } from "../../../src/features/taxonomy/services/taxonom
 import { gapService } from "../../../src/features/gaps/services/gap.service.ts";
 import { buildRoadmapPlan } from "../../../src/features/roadmap/engine/roadmap-planner.ts";
 import { roadmapPlanSchema } from "../../../src/features/roadmap/schemas/roadmap.schema.ts";
+import { mergeValidatedEvidence } from "../../../src/features/taxonomy/utils/merge-validated-evidence.ts";
 import { fingerprintRoleRequirements, ROLE_REQUIREMENTS_FINGERPRINT_VERSION } from "../../../src/features/roadmap/utils/role-requirements-fingerprint.ts";
 import type { ResumeAnalysisLike } from "../../../src/features/taxonomy/types/taxonomy.types.ts";
 
@@ -169,13 +170,33 @@ Deno.serve(async (req: Request) => {
     }
     const resolvedOccurrences = resolvedResult.data;
 
+    // Load completed validation answers for this snapshot (if any)
+    const { data: validationGeneration } = await serviceClient
+      .from('validation_generations')
+      .select('id')
+      .eq('analysis_snapshot_id', analysisSnapshotId)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    let mergedOccurrences = resolvedOccurrences;
+    if (validationGeneration?.id) {
+      const { data: questions } = await serviceClient
+        .from('validation_questions')
+        .select('*, validation_question_options(*), validation_answers(*)')
+        .eq('generation_id', validationGeneration.id);
+      
+      mergedOccurrences = mergeValidatedEvidence(resolvedOccurrences, questions ?? []);
+    }
+
     // Run matching
     const matchResult = taxonomyService.matchRoleRequirements(
       roleData.id,
       roleData.name,
       roleData.slug,
       requirements,
-      resolvedOccurrences,
+      mergedOccurrences,
       []
     );
 

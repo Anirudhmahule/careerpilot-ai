@@ -59,19 +59,26 @@ function Insights() {
     );
   }
 
+  const displayRole = journey?.target_role 
+    ? journey.target_role
+        .split(/[-_]/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ')
+    : "your target role";
+
   return (
     <div className="mx-auto max-w-7xl">
       <PageHeader
         eyebrow="Insights"
-        title="Where you stand for Senior Frontend Eng."
+        title={`Where you stand for ${displayRole}`}
         description="Score, breakdown, skills, gaps and role fit — all on one page."
         actions={
           <>
             <Link
-              to="/app/compare"
+              to="/app/validation"
               className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs hover:bg-accent"
             >
-              Compare v3 → v4
+              <Beaker className="h-3.5 w-3.5" /> Validate Skills
             </Link>
             <Link
               to="/app/roadmap"

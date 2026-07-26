@@ -52,25 +52,18 @@ export function useJourney(): UseJourneyReturn {
         setIsLoading(true);
         setError(null);
 
-        console.log('[useJourney] loading journey for user:', userId);
-
         const { data, error: serviceError } = await journeyService.getJourneyByUserId(userId);
 
-        console.log('[useJourney] result:', { data, error: serviceError });
-
         if (!mountedRef.current) {
-            console.warn('[useJourney] loadJourney: component unmounted before response, dropping result');
             return;
         }
 
         if (serviceError) {
-            console.error('[useJourney] loadJourney error:', serviceError);
             setError(serviceError);
             setIsLoading(false);
             return;
         }
 
-        console.log('[useJourney] setJourney:', data);
         setJourney(data);
         setIsLoading(false);
     }, []);
@@ -93,11 +86,7 @@ export function useJourney(): UseJourneyReturn {
             setIsLoading(true);
             setError(null);
 
-            console.log('[useJourney] loading journey for user:', user.id);
-
             const { data, error: serviceError } = await journeyService.getJourneyByUserId(user.id);
-
-            console.log('[useJourney] result:', { data, error: serviceError });
 
             if (cancelled) return;
 

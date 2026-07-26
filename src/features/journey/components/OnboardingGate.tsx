@@ -37,12 +37,7 @@ export function OnboardingGate({ children }: OnboardingGateProps) {
 
     const isOnWizard = currentPath.startsWith(WIZARD_PATH);
 
-    console.log('[OnboardingGate]', {
-        isLoading,
-        hasJourney: journey !== null,
-        journey,
-        pathname: window.location.pathname,
-    });
+
 
     useEffect(() => {
         if (isLoading) return;       // wait for the journey fetch to settle

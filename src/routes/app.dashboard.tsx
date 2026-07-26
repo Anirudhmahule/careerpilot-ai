@@ -1,4 +1,4 @@
-﻿import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -87,7 +87,7 @@ function Dashboard() {
           </p>
           <div className="mt-6 flex items-center justify-center gap-3">
             <Link
-              to="/app/journey"
+              to="/app/journey/create"
               className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Set up Journey
@@ -121,7 +121,7 @@ function Dashboard() {
               <FileText className="h-3.5 w-3.5" /> Upload resume
             </Link>
             <Link
-              to="/app/journey"
+              to="/app/journey/create"
               className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
             >
               <Plus className="h-3.5 w-3.5" /> New journey
@@ -186,7 +186,7 @@ function Dashboard() {
 
       <div className="mt-4 grid grid-cols-12 gap-4">
         {/* Readiness overview */}
-        <section className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs xl:col-span-8">
+        <section className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs">
           <div className="flex items-start justify-between">
             <div>
               <div className="text-xs font-medium">Readiness overview</div>
@@ -225,55 +225,6 @@ function Dashboard() {
               </div>
             </div>
           )}
-        </section>
-
-        {/* Next Tasks */}
-        <section className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs xl:col-span-4 flex flex-col">
-          <div className="flex items-center justify-between">
-            <div className="text-xs font-medium">Next tasks</div>
-          </div>
-
-          <div className="mt-4 flex-1">
-            {isLoading.roadmap ? (
-              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 py-8">
-                <span className="text-sm text-muted-foreground">Loading roadmap...</span>
-              </div>
-            ) : !roadmap?.hasActiveRoadmap ? (
-              <div className="flex h-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center">
-                <span className="text-sm text-muted-foreground">No active roadmap.</span>
-                <Link to="/app/roadmap" className="mt-2 text-xs text-primary hover:underline">Generate one now</Link>
-              </div>
-            ) : roadmap.nextPendingTasks.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center">
-                <span className="text-sm text-muted-foreground">All caught up!</span>
-                <CheckCircle2 className="mt-2 h-6 w-6 text-success opacity-50" />
-              </div>
-            ) : (
-              <ul className="space-y-2">
-                {roadmap.nextPendingTasks.map((t: RoadmapTaskView) => (
-                  <li
-                    key={t.id}
-                    className="group flex items-start gap-2 rounded-lg border border-border bg-background p-2.5 text-sm"
-                  >
-                    <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm">
-                        {t.title}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground capitalize">{t.type}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <Link
-            to="/app/roadmap"
-            className="mt-4 inline-flex items-center gap-1 text-xs text-primary hover:underline"
-          >
-            Open planner <ArrowRight className="h-3 w-3" />
-          </Link>
         </section>
 
         {/* Roadmap progress */}
@@ -364,7 +315,7 @@ function Dashboard() {
         </section>
 
         {/* Quick actions */}
-        <section className="col-span-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="col-span-12 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <QuickAction
             to="/app/resume"
             icon={<FileText className="h-4 w-4" />}
@@ -382,12 +333,6 @@ function Dashboard() {
             icon={<MapIcon className="h-4 w-4" />}
             title="View roadmap"
             sub="Sprints, modules, daily tasks."
-          />
-          <QuickAction
-            to="/app/compare"
-            icon={<Sparkles className="h-4 w-4" />}
-            title="Compare versions"
-            sub="See exactly what changed."
           />
         </section>
       </div>

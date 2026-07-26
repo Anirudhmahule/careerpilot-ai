@@ -18,8 +18,10 @@ import { supabase } from '@/lib/supabase';
 import { useCallback, useEffect, useState } from 'react';
 import { analysisService } from '@/features/analysis/services/analysis.service';
 import { taxonomyService } from '@/features/taxonomy/services/taxonomy.service';
+import { validationService } from '@/features/validation/services/validation.service';
 import { parseSnapshotRawResponse } from '@/lib/resume-analysis.schema';
 import type { EvidenceOccurrence, RoleMatchResult, TaxonomyRoleSlug } from '@/features/taxonomy/types/taxonomy.types';
+import { mergeValidatedEvidence } from '../utils/merge-validated-evidence';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -109,9 +111,21 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlu
       return;
     }
 
-    setOccurrences(resolved);
+    // 5. Validation Merge (apply user answers if available)
+    let finalOccurrences = resolved;
+    const { data: latestGen, error: genError } = await validationService.getLatestCompletedGeneration(snapshot.id);
+    
+    // We don't fail the taxonomy load if validation answers fail to load; we just proceed with unmerged evidence
+    if (latestGen && !genError) {
+      const { data: questions, error: questionsError } = await validationService.getQuestionsWithAnswers(latestGen.id);
+      if (questions && !questionsError) {
+        finalOccurrences = mergeValidatedEvidence(resolved, questions);
+      }
+    }
 
-    // 5. Role Matching (if a role is provided)
+    setOccurrences(finalOccurrences);
+
+    // 6. Role Matching (if a role is provided)
     if (currentRoleSlug) {
       const { data: roleReqs, error: roleError } = await taxonomyService.getRoleRequirements(currentRoleSlug, supabase);
       
@@ -123,7 +137,7 @@ export function useTaxonomy(resumeVersionId?: string, roleSlug?: TaxonomyRoleSlu
           roleReqs.roleName,
           roleReqs.roleSlug,
           roleReqs.requirements,
-          resolved
+          finalOccurrences
         );
         setMatchResult(match);
       }

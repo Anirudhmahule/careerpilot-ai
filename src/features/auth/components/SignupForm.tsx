@@ -170,13 +170,9 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
                 {/* ── Legal note ───────────────────────────────────────────────── */}
                 <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
                     By creating an account you agree to our{' '}
-                    <a href="#" className="text-foreground underline-offset-2 hover:underline">
-                        Terms of Service
-                    </a>{' '}
+                    <span className="text-foreground font-medium">Terms of Service</span>{' '}
                     and{' '}
-                    <a href="#" className="text-foreground underline-offset-2 hover:underline">
-                        Privacy Policy
-                    </a>
+                    <span className="text-foreground font-medium">Privacy Policy</span>
                     .
                 </p>
 

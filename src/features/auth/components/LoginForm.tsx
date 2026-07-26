@@ -119,13 +119,6 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
                         <FormItem>
                             <div className="flex items-center justify-between">
                                 <FormLabel className="text-xs font-medium">Password</FormLabel>
-                                <Link
-                                    to="/auth"
-                                    tabIndex={-1}
-                                    className="text-xs text-muted-foreground hover:text-primary hover:underline focus:outline-none focus:underline"
-                                >
-                                    Forgot password?
-                                </Link>
                             </div>
                             <FormControl>
                                 <PasswordInput

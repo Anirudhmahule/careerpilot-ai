@@ -74,3 +74,52 @@ export const MutateValidationAnswerRequestSchema = z.object({
     }).strict(),
   ]),
 }).strict();
+
+export type MutateValidationAnswerRequest = z.infer<typeof MutateValidationAnswerRequestSchema>;
+
+// DB Row Contracts
+export interface ValidationGenerationRow {
+  id: string;
+  analysis_snapshot_id: string;
+  role_id: string;
+  status: ValidationGenerationStatus;
+  prompt_version: string;
+  schema_version: string;
+  model: string;
+  error_message?: string;
+  created_at: string;
+  completed_at?: string;
+}
+
+export interface ValidationQuestionOptionRow {
+  id: string;
+  question_id: string;
+  option_key: string;
+  option_label: string;
+  order_index: number;
+}
+
+export interface ValidationAnswerRow {
+  question_id: string;
+  user_id: string;
+  boolean_value: boolean | null;
+  selected_option_id: string | null;
+  text_value: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ValidationQuestionRow {
+  id: string;
+  generation_id: string;
+  semantic_type: ValidationQuestionSemanticType;
+  input_type: ValidationQuestionInputType;
+  skill_id: string | null;
+  source_entity_id: string | null;
+  question_text: string;
+  order_index: number;
+  created_at: string;
+  validation_question_options: ValidationQuestionOptionRow[];
+  validation_answers: ValidationAnswerRow[];
+}
+

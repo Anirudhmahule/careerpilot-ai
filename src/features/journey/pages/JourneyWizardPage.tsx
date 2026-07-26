@@ -195,17 +195,10 @@ export function JourneyWizardPage() {
             return;
         }
 
-        const unsubscribe = router.subscribe('onResolved', () => {
-            console.log('ROUTE RESOLVED', window.location.pathname);
-            unsubscribe();
-        });
-
-        console.log('BEFORE NAVIGATE', window.location.pathname);
         void navigate({
             to: '/app/dashboard',
             replace: true,
         });
-        console.log('AFTER NAVIGATE CALL', window.location.pathname);
     }
 
     // ─── Progress ───────────────────────────────────────────────────────────────

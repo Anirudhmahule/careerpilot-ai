@@ -16,6 +16,7 @@ import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AppValidationRouteImport } from './routes/app.validation'
 import { Route as AppSuggestionsRouteImport } from './routes/app.suggestions'
 import { Route as AppRoadmapRouteImport } from './routes/app.roadmap'
 import { Route as AppResumeRouteImport } from './routes/app.resume'
@@ -62,6 +63,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AuthRoute,
+} as any)
+const AppValidationRoute = AppValidationRouteImport.update({
+  id: '/validation',
+  path: '/validation',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSuggestionsRoute = AppSuggestionsRouteImport.update({
   id: '/suggestions',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
   '/app/suggestions': typeof AppSuggestionsRoute
+  '/app/validation': typeof AppValidationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/app/': typeof AppIndexRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
   '/app/suggestions': typeof AppSuggestionsRoute
+  '/app/validation': typeof AppValidationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/app': typeof AppIndexRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
   '/app/suggestions': typeof AppSuggestionsRoute
+  '/app/validation': typeof AppValidationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
   '/app/': typeof AppIndexRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/app/resume'
     | '/app/roadmap'
     | '/app/suggestions'
+    | '/app/validation'
     | '/auth/login'
     | '/auth/signup'
     | '/app/'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/app/resume'
     | '/app/roadmap'
     | '/app/suggestions'
+    | '/app/validation'
     | '/auth/login'
     | '/auth/signup'
     | '/app'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/app/resume'
     | '/app/roadmap'
     | '/app/suggestions'
+    | '/app/validation'
     | '/auth/login'
     | '/auth/signup'
     | '/app/'
@@ -295,6 +307,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/app/validation': {
+      id: '/app/validation'
+      path: '/validation'
+      fullPath: '/app/validation'
+      preLoaderRoute: typeof AppValidationRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/suggestions': {
       id: '/app/suggestions'
@@ -387,6 +406,7 @@ interface AppRouteChildren {
   AppResumeRoute: typeof AppResumeRoute
   AppRoadmapRoute: typeof AppRoadmapRoute
   AppSuggestionsRoute: typeof AppSuggestionsRoute
+  AppValidationRoute: typeof AppValidationRoute
   AppIndexRoute: typeof AppIndexRoute
   AppJourneyCreateRoute: typeof AppJourneyCreateRoute
 }
@@ -402,6 +422,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppResumeRoute: AppResumeRoute,
   AppRoadmapRoute: AppRoadmapRoute,
   AppSuggestionsRoute: AppSuggestionsRoute,
+  AppValidationRoute: AppValidationRoute,
   AppIndexRoute: AppIndexRoute,
   AppJourneyCreateRoute: AppJourneyCreateRoute,
 }
