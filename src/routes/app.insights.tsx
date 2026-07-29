@@ -20,12 +20,7 @@ function Insights() {
         description="Score, breakdown, skills, gaps and role fit — all on one page."
         actions={
           <>
-            <Link
-              to="/app/compare"
-              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs hover:bg-accent"
-            >
-              Compare v3 → v4
-            </Link>
+
             <Link
               to="/app/roadmap"
               className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
