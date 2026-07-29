@@ -12,17 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppSuggestionsRouteImport } from './routes/app.suggestions'
+import { Route as AuthSignupRouteImport } from './routes/auth.signup'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AppValidationRouteImport } from './routes/app.validation'
 import { Route as AppRoadmapRouteImport } from './routes/app.roadmap'
 import { Route as AppResumeRouteImport } from './routes/app.resume'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
-import { Route as AppPlannerRouteImport } from './routes/app.planner'
 import { Route as AppJourneyRouteImport } from './routes/app.journey'
 import { Route as AppInsightsRouteImport } from './routes/app.insights'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
-import { Route as AppCompareRouteImport } from './routes/app.compare'
-import { Route as AppAnalysisRouteImport } from './routes/app.analysis'
+import { Route as AppJourneyCreateRouteImport } from './routes/app.journey_.create'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -39,14 +40,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSuggestionsRoute = AppSuggestionsRouteImport.update({
-  id: '/suggestions',
-  path: '/suggestions',
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AppValidationRoute = AppValidationRouteImport.update({
+  id: '/validation',
+  path: '/validation',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRoadmapRoute = AppRoadmapRouteImport.update({
@@ -64,11 +80,6 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AppRoute,
 } as any)
-const AppPlannerRoute = AppPlannerRouteImport.update({
-  id: '/planner',
-  path: '/planner',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppJourneyRoute = AppJourneyRouteImport.update({
   id: '/journey',
   path: '/journey',
@@ -84,64 +95,61 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
-const AppCompareRoute = AppCompareRouteImport.update({
-  id: '/compare',
-  path: '/compare',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAnalysisRoute = AppAnalysisRouteImport.update({
-  id: '/analysis',
-  path: '/analysis',
+const AppJourneyCreateRoute = AppJourneyCreateRouteImport.update({
+  id: '/journey_/create',
+  path: '/journey/create',
   getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/app/analysis': typeof AppAnalysisRoute
-  '/app/compare': typeof AppCompareRoute
+  '/auth': typeof AuthRouteWithChildren
   '/app/dashboard': typeof AppDashboardRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/journey': typeof AppJourneyRoute
-  '/app/planner': typeof AppPlannerRoute
   '/app/profile': typeof AppProfileRoute
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
-  '/app/suggestions': typeof AppSuggestionsRoute
+  '/app/validation': typeof AppValidationRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/app/': typeof AppIndexRoute
+  '/auth/': typeof AuthIndexRoute
+  '/app/journey/create': typeof AppJourneyCreateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/app/analysis': typeof AppAnalysisRoute
-  '/app/compare': typeof AppCompareRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/journey': typeof AppJourneyRoute
-  '/app/planner': typeof AppPlannerRoute
   '/app/profile': typeof AppProfileRoute
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
-  '/app/suggestions': typeof AppSuggestionsRoute
+  '/app/validation': typeof AppValidationRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/app': typeof AppIndexRoute
+  '/auth': typeof AuthIndexRoute
+  '/app/journey/create': typeof AppJourneyCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/app/analysis': typeof AppAnalysisRoute
-  '/app/compare': typeof AppCompareRoute
+  '/auth': typeof AuthRouteWithChildren
   '/app/dashboard': typeof AppDashboardRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/journey': typeof AppJourneyRoute
-  '/app/planner': typeof AppPlannerRoute
   '/app/profile': typeof AppProfileRoute
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
-  '/app/suggestions': typeof AppSuggestionsRoute
+  '/app/validation': typeof AppValidationRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/app/': typeof AppIndexRoute
+  '/auth/': typeof AuthIndexRoute
+  '/app/journey_/create': typeof AppJourneyCreateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,54 +157,56 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/auth'
-    | '/app/analysis'
-    | '/app/compare'
     | '/app/dashboard'
     | '/app/insights'
     | '/app/journey'
-    | '/app/planner'
     | '/app/profile'
     | '/app/resume'
     | '/app/roadmap'
-    | '/app/suggestions'
+    | '/app/validation'
+    | '/auth/login'
+    | '/auth/signup'
     | '/app/'
+    | '/auth/'
+    | '/app/journey/create'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
-    | '/app/analysis'
-    | '/app/compare'
     | '/app/dashboard'
     | '/app/insights'
     | '/app/journey'
-    | '/app/planner'
     | '/app/profile'
     | '/app/resume'
     | '/app/roadmap'
-    | '/app/suggestions'
+    | '/app/validation'
+    | '/auth/login'
+    | '/auth/signup'
     | '/app'
+    | '/auth'
+    | '/app/journey/create'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/auth'
-    | '/app/analysis'
-    | '/app/compare'
     | '/app/dashboard'
     | '/app/insights'
     | '/app/journey'
-    | '/app/planner'
     | '/app/profile'
     | '/app/resume'
     | '/app/roadmap'
-    | '/app/suggestions'
+    | '/app/validation'
+    | '/auth/login'
+    | '/auth/signup'
     | '/app/'
+    | '/auth/'
+    | '/app/journey_/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -222,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/app/': {
       id: '/app/'
       path: '/'
@@ -229,11 +246,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/suggestions': {
-      id: '/app/suggestions'
-      path: '/suggestions'
-      fullPath: '/app/suggestions'
-      preLoaderRoute: typeof AppSuggestionsRouteImport
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/app/validation': {
+      id: '/app/validation'
+      path: '/validation'
+      fullPath: '/app/validation'
+      preLoaderRoute: typeof AppValidationRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/roadmap': {
@@ -257,13 +288,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/planner': {
-      id: '/app/planner'
-      path: '/planner'
-      fullPath: '/app/planner'
-      preLoaderRoute: typeof AppPlannerRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/journey': {
       id: '/app/journey'
       path: '/journey'
@@ -285,57 +309,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/compare': {
-      id: '/app/compare'
-      path: '/compare'
-      fullPath: '/app/compare'
-      preLoaderRoute: typeof AppCompareRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/analysis': {
-      id: '/app/analysis'
-      path: '/analysis'
-      fullPath: '/app/analysis'
-      preLoaderRoute: typeof AppAnalysisRouteImport
+    '/app/journey_/create': {
+      id: '/app/journey_/create'
+      path: '/journey/create'
+      fullPath: '/app/journey/create'
+      preLoaderRoute: typeof AppJourneyCreateRouteImport
       parentRoute: typeof AppRoute
     }
   }
 }
 
 interface AppRouteChildren {
-  AppAnalysisRoute: typeof AppAnalysisRoute
-  AppCompareRoute: typeof AppCompareRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppInsightsRoute: typeof AppInsightsRoute
   AppJourneyRoute: typeof AppJourneyRoute
-  AppPlannerRoute: typeof AppPlannerRoute
   AppProfileRoute: typeof AppProfileRoute
   AppResumeRoute: typeof AppResumeRoute
   AppRoadmapRoute: typeof AppRoadmapRoute
-  AppSuggestionsRoute: typeof AppSuggestionsRoute
+  AppValidationRoute: typeof AppValidationRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppJourneyCreateRoute: typeof AppJourneyCreateRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppAnalysisRoute: AppAnalysisRoute,
-  AppCompareRoute: AppCompareRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppInsightsRoute: AppInsightsRoute,
   AppJourneyRoute: AppJourneyRoute,
-  AppPlannerRoute: AppPlannerRoute,
   AppProfileRoute: AppProfileRoute,
   AppResumeRoute: AppResumeRoute,
   AppRoadmapRoute: AppRoadmapRoute,
-  AppSuggestionsRoute: AppSuggestionsRoute,
+  AppValidationRoute: AppValidationRoute,
   AppIndexRoute: AppIndexRoute,
+  AppJourneyCreateRoute: AppJourneyCreateRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AuthRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthSignupRoute: typeof AuthSignupRoute
+  AuthIndexRoute: typeof AuthIndexRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthSignupRoute: AuthSignupRoute,
+  AuthIndexRoute: AuthIndexRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
