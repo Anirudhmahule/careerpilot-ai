@@ -1,16 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowDown, ArrowUp, Sparkles, TrendingUp, Beaker, Check, AlertTriangle, Info } from "lucide-react";
+import { ArrowDown, ArrowUp, Sparkles, TrendingUp } from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
-import { useResume } from "@/features/resume/hooks/useResume";
-import { useJourney } from "@/features/journey/hooks/useJourney";
-import { useTaxonomy } from "@/features/taxonomy/hooks/useTaxonomy";
-import type { UseTaxonomyReturn } from "@/features/taxonomy/hooks/useTaxonomy";
-import { useReadiness } from "@/features/readiness/hooks/useReadiness";
-import type { UseReadinessReturn } from "@/features/readiness/hooks/useReadiness";
-import { useGaps } from "@/features/gaps/hooks/useGaps";
-import type { UseGapsReturn } from "@/features/gaps/hooks/useGaps";
-import { mapTargetRoleToTaxonomySlug } from "@/features/taxonomy/utils/role-mapping";
 
 export const Route = createFileRoute("/app/insights")({
   head: () => ({ meta: [{ title: "Insights — CareerPilot AI" }] }),
@@ -21,65 +12,15 @@ const TABS = ["Overview", "Readiness", "Skills", "Gaps", "Role match"] as const;
 
 function Insights() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
-
-  // Connect real taxonomy pipeline
-  const { latestResume } = useResume();
-  const { journey } = useJourney();
-
-  // Convert target_role to slug if possible (e.g. "Frontend Engineer" -> "frontend-engineer")
-  const roleMapping = mapTargetRoleToTaxonomySlug(journey?.target_role);
-  const roleSlug = roleMapping.supported ? roleMapping.slug : undefined;
-
-  const taxonomy = useTaxonomy(latestResume?.id, roleSlug);
-  const readiness = useReadiness(taxonomy.matchResult);
-  const gaps = useGaps(taxonomy.matchResult);
-
-  if (!roleMapping.supported && journey?.target_role) {
-    return (
-      <div className="mx-auto max-w-7xl">
-        <PageHeader
-          eyebrow="Insights"
-          title={`Where you stand for ${journey.target_role}`}
-          description="Score, breakdown, skills, gaps and role fit — all on one page."
-        />
-        <div className="mt-8 flex flex-col items-center justify-center rounded-xl border border-border bg-card p-12 text-center shadow-xs">
-          <AlertTriangle className="h-12 w-12 text-warning" />
-          <h2 className="mt-4 text-lg font-medium">Role not supported yet</h2>
-          <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            Deep insights and taxonomy resolution are not yet available for legacy or unsupported roles like "{roleMapping.role}". Please select a supported role (e.g., Frontend Engineer) to view your insights.
-          </p>
-          <Link
-            to="/app/journey"
-            className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            Update Journey
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const displayRole = journey?.target_role 
-    ? journey.target_role
-        .split(/[-_]/)
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ')
-    : "your target role";
-
   return (
     <div className="mx-auto max-w-7xl">
       <PageHeader
         eyebrow="Insights"
-        title={`Where you stand for ${displayRole}`}
+        title="Where you stand for Senior Frontend Eng."
         description="Score, breakdown, skills, gaps and role fit — all on one page."
         actions={
           <>
-            <Link
-              to="/app/validation"
-              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs hover:bg-accent"
-            >
-              <Beaker className="h-3.5 w-3.5" /> Validate Skills
-            </Link>
+
             <Link
               to="/app/roadmap"
               className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
@@ -97,7 +38,9 @@ function Insights() {
             onClick={() => setTab(t)}
             className={
               "shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-colors " +
-              (tab === t ? "bg-primary-soft text-primary" : "text-muted-foreground hover:text-foreground")
+              (tab === t
+                ? "bg-primary-soft text-primary"
+                : "text-muted-foreground hover:text-foreground")
             }
           >
             {t}
@@ -105,18 +48,16 @@ function Insights() {
         ))}
       </div>
 
-      {tab === "Overview" && <Overview readiness={readiness} />}
+      {tab === "Overview" && <Overview />}
       {tab === "Readiness" && <Readiness />}
-      {tab === "Skills" && <SkillsTab taxonomy={taxonomy} />}
-      {tab === "Gaps" && <Gaps gaps={gaps} />}
-      {tab === "Role match" && <RoleMatch taxonomy={taxonomy} />}
+      {tab === "Skills" && <SkillsTab />}
+      {tab === "Gaps" && <Gaps />}
+      {tab === "Role match" && <RoleMatch />}
     </div>
   );
 }
 
-function Overview({ readiness }: { readiness: UseReadinessReturn }) {
-  const score = readiness.isReady ? readiness.readiness!.overallScore : undefined;
-
+function Overview() {
   return (
     <div className="grid grid-cols-12 gap-4">
       <section className="col-span-12 rounded-xl border border-border bg-card p-6 shadow-xs lg:col-span-5">
@@ -125,13 +66,7 @@ function Overview({ readiness }: { readiness: UseReadinessReturn }) {
           <span className="text-[11px] text-success">+12 vs v3</span>
         </div>
         <div className="mt-4 flex items-center gap-6">
-          {score !== undefined ? (
-            <ScoreRing value={score} />
-          ) : (
-            <div className="flex h-[110px] w-[110px] items-center justify-center rounded-full border-4 border-dashed border-border text-xs text-muted-foreground">
-              N/A
-            </div>
-          )}
+          <ScoreRing value={78} />
           <div className="space-y-1.5 text-sm">
             <Row k="Target" v="Senior Frontend Eng." />
             <Row k="Experience" v="Mid (3–5 yrs)" />
@@ -213,24 +148,20 @@ function Readiness() {
   );
 }
 
-function SkillsTab({ taxonomy }: { taxonomy: UseTaxonomyReturn }) {
-  const strong = ["React", "TypeScript (mid)", "Next.js", "Tailwind", "Vite", "Git", "Accessibility"];
+function SkillsTab() {
+  const strong = [
+    "React",
+    "TypeScript (mid)",
+    "Next.js",
+    "Tailwind",
+    "Vite",
+    "Git",
+    "Accessibility",
+  ];
   const weak = ["TypeScript generics", "Testing (Playwright)", "Performance", "RSC patterns"];
   const missing = ["System design", "GraphQL", "Web workers", "Real-time (WebSocket)"];
-
-  const { occurrences, isLoading, error } = taxonomy;
-
-  const total = occurrences?.length ?? 0;
-  const exact = occurrences?.filter((o) => o.evidenceKind === "exact").length ?? 0;
-  const contextual = occurrences?.filter((o) => o.evidenceKind === "contextual").length ?? 0;
-  const resolved = occurrences?.filter((o) => o.normalizedSkillId).length ?? 0;
-  const unresolved = occurrences?.filter((o) => !o.normalizedSkillId).length ?? 0;
-  const uniqueUnresolved = Array.from(new Set(occurrences?.filter((o) => !o.normalizedSkillId).map((o) => o.rawName)));
-
   return (
     <div className="grid grid-cols-12 gap-4">
-
-
       <SkillColumn title="Strong" tone="success" items={strong} />
       <SkillColumn title="To improve" tone="warning" items={weak} />
       <SkillColumn title="Missing" tone="destructive" items={missing} />
@@ -266,19 +197,27 @@ function SkillsTab({ taxonomy }: { taxonomy: UseTaxonomyReturn }) {
                         <div
                           className={
                             "h-full rounded-full " +
-                            ((lvl as number) >= 70 ? "bg-success" : (lvl as number) >= 45 ? "bg-primary" : "bg-destructive")
+                            ((lvl as number) >= 70
+                              ? "bg-success"
+                              : (lvl as number) >= 45
+                                ? "bg-primary"
+                                : "bg-destructive")
                           }
                           style={{ width: `${lvl}%` }}
                         />
                       </div>
-                      <span className="w-6 text-right text-[11px] tabular-nums text-muted-foreground">{lvl as number}</span>
+                      <span className="w-6 text-right text-[11px] tabular-nums text-muted-foreground">
+                        {lvl as number}
+                      </span>
                     </div>
                   </td>
                   <td className="py-2.5">
                     <span
                       className={
                         "rounded-md px-1.5 py-0.5 text-[10px] font-medium " +
-                        (val ? "bg-success/10 text-success" : "bg-warning/15 text-[oklch(0.45_0.13_75)]")
+                        (val
+                          ? "bg-success/10 text-success"
+                          : "bg-warning/15 text-[oklch(0.45_0.13_75)]")
                       }
                     >
                       {val ? "Yes" : "Pending"}
@@ -303,124 +242,110 @@ function SkillsTab({ taxonomy }: { taxonomy: UseTaxonomyReturn }) {
   );
 }
 
-function Gaps({ gaps }: { gaps: UseGapsReturn }) {
-  if (!gaps.isReady) {
-    return (
-      <div className="flex h-32 items-center justify-center rounded-xl border border-border bg-card text-sm text-muted-foreground">
-        Gap analysis requires a validated resume and target role.
-      </div>
-    );
-  }
-
-  const result = gaps.gaps!;
-
-  if (result.gaps.length === 0) {
-    return (
-      <div className="flex h-32 items-center justify-center rounded-xl border border-border bg-card text-sm text-muted-foreground">
-        No missing target-role requirements found in the current resume evidence.
-      </div>
-    );
-  }
-
-  const buckets = ["high", "medium", "low"] as const;
-
+function Gaps() {
+  const items = [
+    { p: "High", s: "System design", w: "Caching, sharding, scale", est: "2 sprints" },
+    { p: "High", s: "TypeScript generics", w: "Constraints, conditional types", est: "1 sprint" },
+    { p: "High", s: "Testing (Playwright)", w: "E2E patterns, fixtures", est: "1 sprint" },
+    { p: "Medium", s: "Caching strategies", w: "HTTP, CDN, SWR", est: "1 sprint" },
+    { p: "Medium", s: "Performance budgets", w: "Lighthouse, RUM", est: "3 weeks" },
+    { p: "Low", s: "Accessibility (WCAG)", w: "Forms, focus mgmt", est: "2 weeks" },
+  ];
+  const buckets = ["High", "Medium", "Low"] as const;
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      {buckets.map((b) => {
-        const bucketGaps = result.gaps.filter((g) => g.priority === b);
-        return (
-          <section key={b} className="rounded-xl border border-border bg-card p-5 shadow-xs">
-            <div className="flex items-center justify-between">
-              <div className="text-xs font-medium capitalize">{b} priority</div>
-              <span className="rounded-md bg-surface px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                {bucketGaps.length}
-              </span>
-            </div>
-            <ul className="mt-3 space-y-2">
-              {bucketGaps.map((g) => (
-                <li key={g.skillId} className="rounded-lg border border-border p-3">
+      {buckets.map((b) => (
+        <section key={b} className="rounded-xl border border-border bg-card p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-medium">{b} priority</div>
+            <span className="rounded-md bg-surface px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              {items.filter((i) => i.p === b).length}
+            </span>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {items
+              .filter((i) => i.p === b)
+              .map((g) => (
+                <li key={g.s} className="rounded-lg border border-border p-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{g.canonicalName || "Unknown requirement"}</span>
+                    <span className="text-sm font-medium">{g.s}</span>
+                    <span className="text-[10px] text-muted-foreground">{g.est}</span>
                   </div>
-                  <p className="mt-1 text-[11px] text-muted-foreground">{g.reason}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{g.w}</p>
                 </li>
               ))}
-            </ul>
-          </section>
-        );
-      })}
+          </ul>
+        </section>
+      ))}
     </div>
   );
 }
 
-function RoleMatch({ taxonomy }: { taxonomy: UseTaxonomyReturn }) {
-  const { matchResult, isLoading, error } = taxonomy;
-
-  if (isLoading) {
-    return <div className="text-sm text-muted-foreground animate-pulse">Running deterministic matcher...</div>;
-  }
-
-  if (error) {
-    return <div className="text-sm text-destructive">Error: {error.message}</div>;
-  }
-
-  if (!matchResult) {
-    return <div className="text-sm text-muted-foreground">No matching data available.</div>;
-  }
-
+function RoleMatch() {
+  const roles = [
+    { r: "Frontend Engineer", m: 86, fit: ["React", "TS", "Next.js"], miss: ["Sys design"] },
+    {
+      r: "React Developer",
+      m: 81,
+      fit: ["React", "Patterns", "Tailwind"],
+      miss: ["Testing", "Perf"],
+    },
+    { r: "Next.js Developer", m: 74, fit: ["Next.js", "RSC", "Edge"], miss: ["GraphQL"] },
+    { r: "Full-stack Engineer", m: 58, fit: ["React"], miss: ["Node", "DB", "Sys design"] },
+  ];
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      <section className="rounded-xl border border-primary bg-card p-5 shadow-xs">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-sm font-semibold text-primary">{matchResult.roleName}</div>
-            <div className="text-[11px] text-muted-foreground">Target Role (Real Match)</div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm font-semibold tabular-nums text-muted-foreground">TBD</div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">match score</div>
-          </div>
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-          <div>
-            <div className="text-[10px] uppercase tracking-wider text-success">Matched Skills</div>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {matchResult.matched.length > 0 ? matchResult.matched.map((m) => (
-                <span key={m.skillId} className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success" title={m.importance}>
-                  {m.canonicalName}
-                </span>
-              )) : <span className="text-[10px] text-muted-foreground">None</span>}
+      {roles.map((r) => (
+        <section key={r.r} className="rounded-xl border border-border bg-card p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold">{r.r}</div>
+              <div className="text-[11px] text-muted-foreground">Role-fit based on resume v4</div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-semibold tabular-nums">{r.m}%</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                match
+              </div>
             </div>
           </div>
-          <div>
-            <div className="text-[10px] uppercase tracking-wider text-destructive">Missing Skills</div>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {matchResult.missing.length > 0 ? matchResult.missing.map((m) => (
-                <span key={m.skillId} className="rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive" title={m.importance}>
-                  {m.canonicalName}
-                </span>
-              )) : <span className="text-[10px] text-muted-foreground">None</span>}
+          <div className="mt-3 h-1.5 rounded-full bg-border">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${r.m}%` }} />
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Strong match
+              </div>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {r.fit.map((f) => (
+                  <span
+                    key={f}
+                    className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success"
+                  >
+                    {f}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Missing
+              </div>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {r.miss.map((m) => (
+                  <span
+                    key={m}
+                    className="rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive"
+                  >
+                    {m}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Additional skills block */}
-      <section className="rounded-xl border border-border bg-card p-5 shadow-xs">
-        <div className="text-sm font-semibold">Additional Skills</div>
-        <div className="text-[11px] text-muted-foreground mb-4">Resolved skills not explicitly required by this role</div>
-        <div className="flex flex-wrap gap-1.5">
-          {matchResult.additionalSkills.filter((m) => m.canonicalName).length > 0
-            ? matchResult.additionalSkills
-              .filter((m) => m.canonicalName)
-              .map((m) => (
-                <span key={m.skillId} className="rounded-md border border-border bg-surface px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                  {m.canonicalName}
-                </span>
-              ))
-            : <span className="text-[10px] text-muted-foreground">None</span>}
-        </div>
-      </section>
+        </section>
+      ))}
     </div>
   );
 }
@@ -433,7 +358,14 @@ function ScoreRing({ value, large }: { value: number; large?: boolean }) {
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="oklch(0.92 0.008 255)" strokeWidth={large ? 10 : 8} fill="none" />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="oklch(0.92 0.008 255)"
+          strokeWidth={large ? 10 : 8}
+          fill="none"
+        />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -447,7 +379,9 @@ function ScoreRing({ value, large }: { value: number; large?: boolean }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className={(large ? "text-5xl" : "text-3xl") + " font-semibold tabular-nums"}>{value}</span>
+        <span className={(large ? "text-5xl" : "text-3xl") + " font-semibold tabular-nums"}>
+          {value}
+        </span>
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">/ 100</span>
       </div>
     </div>
@@ -463,18 +397,31 @@ function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
-function SkillColumn({ title, tone, items }: { title: string; tone: "success" | "warning" | "destructive"; items: string[] }) {
-  const dotCls = tone === "success" ? "bg-success" : tone === "warning" ? "bg-warning" : "bg-destructive";
+function SkillColumn({
+  title,
+  tone,
+  items,
+}: {
+  title: string;
+  tone: "success" | "warning" | "destructive";
+  items: string[];
+}) {
+  const dotCls =
+    tone === "success" ? "bg-success" : tone === "warning" ? "bg-warning" : "bg-destructive";
   return (
     <section className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs md:col-span-6 lg:col-span-4">
       <div className="flex items-center gap-2">
         <span className={"h-2 w-2 rounded-full " + dotCls} />
         <div className="text-xs font-medium">{title}</div>
-        <span className="ml-auto rounded-md bg-surface px-1.5 py-0.5 text-[10px] text-muted-foreground">{items.length}</span>
+        <span className="ml-auto rounded-md bg-surface px-1.5 py-0.5 text-[10px] text-muted-foreground">
+          {items.length}
+        </span>
       </div>
       <ul className="mt-3 flex flex-wrap gap-1.5">
         {items.map((i) => (
-          <li key={i} className="rounded-md border border-border bg-surface px-2 py-1 text-xs">{i}</li>
+          <li key={i} className="rounded-md border border-border bg-surface px-2 py-1 text-xs">
+            {i}
+          </li>
         ))}
       </ul>
     </section>

@@ -17,12 +17,16 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AppValidationRouteImport } from './routes/app.validation'
+import { Route as AppSuggestionsRouteImport } from './routes/app.suggestions'
 import { Route as AppRoadmapRouteImport } from './routes/app.roadmap'
 import { Route as AppResumeRouteImport } from './routes/app.resume'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppPlannerRouteImport } from './routes/app.planner'
 import { Route as AppJourneyRouteImport } from './routes/app.journey'
 import { Route as AppInsightsRouteImport } from './routes/app.insights'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppCompareRouteImport } from './routes/app.compare'
+import { Route as AppAnalysisRouteImport } from './routes/app.analysis'
 import { Route as AppJourneyCreateRouteImport } from './routes/app.journey_.create'
 
 const AuthRoute = AuthRouteImport.update({
@@ -65,6 +69,11 @@ const AppValidationRoute = AppValidationRouteImport.update({
   path: '/validation',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSuggestionsRoute = AppSuggestionsRouteImport.update({
+  id: '/suggestions',
+  path: '/suggestions',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppRoadmapRoute = AppRoadmapRouteImport.update({
   id: '/roadmap',
   path: '/roadmap',
@@ -78,6 +87,11 @@ const AppResumeRoute = AppResumeRouteImport.update({
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlannerRoute = AppPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
   getParentRoute: () => AppRoute,
 } as any)
 const AppJourneyRoute = AppJourneyRouteImport.update({
@@ -95,6 +109,16 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCompareRoute = AppCompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalysisRoute = AppAnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppJourneyCreateRoute = AppJourneyCreateRouteImport.update({
   id: '/journey_/create',
   path: '/journey/create',
@@ -105,12 +129,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/app/analysis': typeof AppAnalysisRoute
+  '/app/compare': typeof AppCompareRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/journey': typeof AppJourneyRoute
+  '/app/planner': typeof AppPlannerRoute
   '/app/profile': typeof AppProfileRoute
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
+  '/app/suggestions': typeof AppSuggestionsRoute
   '/app/validation': typeof AppValidationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -120,12 +148,16 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/analysis': typeof AppAnalysisRoute
+  '/app/compare': typeof AppCompareRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/journey': typeof AppJourneyRoute
+  '/app/planner': typeof AppPlannerRoute
   '/app/profile': typeof AppProfileRoute
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
+  '/app/suggestions': typeof AppSuggestionsRoute
   '/app/validation': typeof AppValidationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -138,12 +170,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/app/analysis': typeof AppAnalysisRoute
+  '/app/compare': typeof AppCompareRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/insights': typeof AppInsightsRoute
   '/app/journey': typeof AppJourneyRoute
+  '/app/planner': typeof AppPlannerRoute
   '/app/profile': typeof AppProfileRoute
   '/app/resume': typeof AppResumeRoute
   '/app/roadmap': typeof AppRoadmapRoute
+  '/app/suggestions': typeof AppSuggestionsRoute
   '/app/validation': typeof AppValidationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -157,12 +193,16 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/auth'
+    | '/app/analysis'
+    | '/app/compare'
     | '/app/dashboard'
     | '/app/insights'
     | '/app/journey'
+    | '/app/planner'
     | '/app/profile'
     | '/app/resume'
     | '/app/roadmap'
+    | '/app/suggestions'
     | '/app/validation'
     | '/auth/login'
     | '/auth/signup'
@@ -172,12 +212,16 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app/analysis'
+    | '/app/compare'
     | '/app/dashboard'
     | '/app/insights'
     | '/app/journey'
+    | '/app/planner'
     | '/app/profile'
     | '/app/resume'
     | '/app/roadmap'
+    | '/app/suggestions'
     | '/app/validation'
     | '/auth/login'
     | '/auth/signup'
@@ -189,12 +233,16 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/auth'
+    | '/app/analysis'
+    | '/app/compare'
     | '/app/dashboard'
     | '/app/insights'
     | '/app/journey'
+    | '/app/planner'
     | '/app/profile'
     | '/app/resume'
     | '/app/roadmap'
+    | '/app/suggestions'
     | '/app/validation'
     | '/auth/login'
     | '/auth/signup'
@@ -267,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppValidationRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/suggestions': {
+      id: '/app/suggestions'
+      path: '/suggestions'
+      fullPath: '/app/suggestions'
+      preLoaderRoute: typeof AppSuggestionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/roadmap': {
       id: '/app/roadmap'
       path: '/roadmap'
@@ -286,6 +341,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/app/profile'
       preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/planner': {
+      id: '/app/planner'
+      path: '/planner'
+      fullPath: '/app/planner'
+      preLoaderRoute: typeof AppPlannerRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/journey': {
@@ -309,6 +371,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/compare': {
+      id: '/app/compare'
+      path: '/compare'
+      fullPath: '/app/compare'
+      preLoaderRoute: typeof AppCompareRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/analysis': {
+      id: '/app/analysis'
+      path: '/analysis'
+      fullPath: '/app/analysis'
+      preLoaderRoute: typeof AppAnalysisRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/journey_/create': {
       id: '/app/journey_/create'
       path: '/journey/create'
@@ -320,24 +396,32 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAnalysisRoute: typeof AppAnalysisRoute
+  AppCompareRoute: typeof AppCompareRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppInsightsRoute: typeof AppInsightsRoute
   AppJourneyRoute: typeof AppJourneyRoute
+  AppPlannerRoute: typeof AppPlannerRoute
   AppProfileRoute: typeof AppProfileRoute
   AppResumeRoute: typeof AppResumeRoute
   AppRoadmapRoute: typeof AppRoadmapRoute
+  AppSuggestionsRoute: typeof AppSuggestionsRoute
   AppValidationRoute: typeof AppValidationRoute
   AppIndexRoute: typeof AppIndexRoute
   AppJourneyCreateRoute: typeof AppJourneyCreateRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAnalysisRoute: AppAnalysisRoute,
+  AppCompareRoute: AppCompareRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppInsightsRoute: AppInsightsRoute,
   AppJourneyRoute: AppJourneyRoute,
+  AppPlannerRoute: AppPlannerRoute,
   AppProfileRoute: AppProfileRoute,
   AppResumeRoute: AppResumeRoute,
   AppRoadmapRoute: AppRoadmapRoute,
+  AppSuggestionsRoute: AppSuggestionsRoute,
   AppValidationRoute: AppValidationRoute,
   AppIndexRoute: AppIndexRoute,
   AppJourneyCreateRoute: AppJourneyCreateRoute,
