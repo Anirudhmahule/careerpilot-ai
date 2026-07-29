@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="140" fill="#818cf8" />
+  <g stroke="#111827" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Main Sparkle -->
+    <path d="M 270 140 Q 270 270 400 270 Q 270 270 270 400 Q 270 270 140 270 Q 270 270 270 140 Z" stroke-width="40" />
+    
+    <!-- Top Right Sparkle -->
+    <path d="M 400 90 Q 400 130 440 130 Q 400 130 400 170 Q 400 130 360 130 Q 400 130 400 90 Z" stroke-width="28" />
+    
+    <!-- Bottom Left Dot -->
+    <circle cx="160" cy="380" r="24" stroke-width="32" />
+  </g>
+</svg>
