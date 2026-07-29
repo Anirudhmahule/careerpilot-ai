@@ -19,7 +19,8 @@ function Compare() {
             to="/app/suggestions"
             className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
-            <Sparkles className="h-3.5 w-3.5" /> Get suggestions <ArrowRight className="h-3.5 w-3.5" />
+            <Sparkles className="h-3.5 w-3.5" /> Get suggestions{" "}
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         }
       />
@@ -29,7 +30,10 @@ function Compare() {
           { v: "v3", date: "Jan 12, 2026", score: 66 },
           { v: "v4", date: "Mar 04, 2026", score: 78, current: true },
         ].map((r) => (
-          <div key={r.v} className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-xs">
+          <div
+            key={r.v}
+            className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-xs"
+          >
             <div className="flex items-center gap-3">
               <button className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-surface px-2 text-xs">
                 {r.v} <ChevronDown className="h-3 w-3" />
@@ -41,7 +45,9 @@ function Compare() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-semibold tabular-nums">{r.score}</div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">readiness</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                readiness
+              </div>
             </div>
           </div>
         ))}
@@ -50,7 +56,9 @@ function Compare() {
       <div className="mb-4 rounded-xl border border-border bg-card p-5 shadow-xs">
         <div className="flex items-center justify-between">
           <div className="text-xs font-medium">Readiness delta</div>
-          <span className="rounded-md bg-success/10 px-2 py-0.5 text-xs font-medium text-success">+12 points</span>
+          <span className="rounded-md bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+            +12 points
+          </span>
         </div>
         <div className="mt-4 grid grid-cols-12 items-center gap-4 text-xs">
           <div className="col-span-3 text-right text-muted-foreground">v3 · 66</div>
@@ -66,10 +74,22 @@ function Compare() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <DiffCard tone="add" title="Added skills" items={["TypeScript generics", "Vitest", "RHF + Zod", "Caching basics"]} />
+        <DiffCard
+          tone="add"
+          title="Added skills"
+          items={["TypeScript generics", "Vitest", "RHF + Zod", "Caching basics"]}
+        />
         <DiffCard tone="rem" title="Removed" items={["Outdated jQuery", "Bootstrap v3 mention"]} />
-        <DiffCard tone="up" title="Improved" items={["System design", "Testing patterns", "Project outcomes"]} />
-        <DiffCard tone="closed" title="Closed gaps" items={["Modern React patterns", "TS depth (mid)"]} />
+        <DiffCard
+          tone="up"
+          title="Improved"
+          items={["System design", "Testing patterns", "Project outcomes"]}
+        />
+        <DiffCard
+          tone="closed"
+          title="Closed gaps"
+          items={["Modern React patterns", "TS depth (mid)"]}
+        />
       </div>
 
       <section className="mt-6 rounded-xl border border-border bg-card p-5 shadow-xs">
@@ -77,7 +97,8 @@ function Compare() {
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           {[
             {
-              v: "v3", lines: [
+              v: "v3",
+              lines: [
                 { tone: "ctx", t: "Built React dashboard for analytics team." },
                 { tone: "rem", t: "Used jQuery for some legacy widgets." },
                 { tone: "ctx", t: "Wrote a few unit tests." },
@@ -85,7 +106,8 @@ function Compare() {
               ],
             },
             {
-              v: "v4", lines: [
+              v: "v4",
+              lines: [
                 { tone: "ctx", t: "Led React dashboard rebuild — 38% faster TTI." },
                 { tone: "add", t: "Designed component API used by 4 teams." },
                 { tone: "add", t: "Wrote 80+ Vitest unit tests + 12 Playwright e2e." },
@@ -94,7 +116,9 @@ function Compare() {
             },
           ].map((s) => (
             <div key={s.v} className="rounded-lg border border-border bg-background p-4">
-              <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{s.v}</div>
+              <div className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                {s.v}
+              </div>
               <ul className="space-y-1.5">
                 {s.lines.map((l, i) => (
                   <li
@@ -104,10 +128,10 @@ function Compare() {
                       (l.tone === "add"
                         ? "bg-success/10 text-success"
                         : l.tone === "rem"
-                        ? "bg-destructive/10 text-destructive line-through"
-                        : l.tone === "up"
-                        ? "bg-primary-soft text-primary"
-                        : "text-muted-foreground")
+                          ? "bg-destructive/10 text-destructive line-through"
+                          : l.tone === "up"
+                            ? "bg-primary-soft text-primary"
+                            : "text-muted-foreground")
                     }
                   >
                     {l.t}
@@ -122,12 +146,36 @@ function Compare() {
   );
 }
 
-function DiffCard({ tone, title, items }: { tone: "add" | "rem" | "up" | "closed"; title: string; items: string[] }) {
+function DiffCard({
+  tone,
+  title,
+  items,
+}: {
+  tone: "add" | "rem" | "up" | "closed";
+  title: string;
+  items: string[];
+}) {
   const map = {
-    add: { icon: <Plus className="h-3 w-3" />, cls: "bg-success/10 text-success", border: "border-success/30" },
-    rem: { icon: <Minus className="h-3 w-3" />, cls: "bg-destructive/10 text-destructive", border: "border-destructive/30" },
-    up: { icon: <Sparkles className="h-3 w-3" />, cls: "bg-warning/15 text-[oklch(0.45_0.13_75)]", border: "border-warning/30" },
-    closed: { icon: <Plus className="h-3 w-3" />, cls: "bg-primary-soft text-primary", border: "border-primary/30" },
+    add: {
+      icon: <Plus className="h-3 w-3" />,
+      cls: "bg-success/10 text-success",
+      border: "border-success/30",
+    },
+    rem: {
+      icon: <Minus className="h-3 w-3" />,
+      cls: "bg-destructive/10 text-destructive",
+      border: "border-destructive/30",
+    },
+    up: {
+      icon: <Sparkles className="h-3 w-3" />,
+      cls: "bg-warning/15 text-[oklch(0.45_0.13_75)]",
+      border: "border-warning/30",
+    },
+    closed: {
+      icon: <Plus className="h-3 w-3" />,
+      cls: "bg-primary-soft text-primary",
+      border: "border-primary/30",
+    },
   }[tone];
   return (
     <section className={"rounded-xl border bg-card p-5 shadow-xs " + map.border}>

@@ -1,5 +1,13 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, CloudUpload, Download, FileText, MoreHorizontal, Sparkles, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  CloudUpload,
+  Download,
+  FileText,
+  MoreHorizontal,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { PageHeader } from "@/components/app-shell";
 
 export const Route = createFileRoute("/app/resume")({
@@ -8,8 +16,21 @@ export const Route = createFileRoute("/app/resume")({
 });
 
 const versions = [
-  { v: "v4", file: "arjun-kumar-frontend.pdf", date: "Mar 04, 2026", score: 78, current: true, notes: "Added 2 projects, TS depth, Vitest" },
-  { v: "v3", file: "arjun-kumar-frontend.pdf", date: "Jan 12, 2026", score: 66, notes: "First post-bootcamp polish" },
+  {
+    v: "v4",
+    file: "arjun-kumar-frontend.pdf",
+    date: "Mar 04, 2026",
+    score: 78,
+    current: true,
+    notes: "Added 2 projects, TS depth, Vitest",
+  },
+  {
+    v: "v3",
+    file: "arjun-kumar-frontend.pdf",
+    date: "Jan 12, 2026",
+    score: 66,
+    notes: "First post-bootcamp polish",
+  },
   { v: "v2", file: "arjun-resume-draft.docx", date: "Nov 22, 2025", score: 58 },
   { v: "v1", file: "resume-original.pdf", date: "Oct 03, 2025", score: 41 },
 ];
@@ -40,7 +61,9 @@ function Resume() {
                 <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl border border-border bg-background text-primary shadow-xs">
                   <CloudUpload className="h-5 w-5" />
                 </div>
-                <div className="mt-4 text-sm font-medium">Drop your resume here, or click to upload</div>
+                <div className="mt-4 text-sm font-medium">
+                  Drop your resume here, or click to upload
+                </div>
                 <p className="mt-1 text-xs text-muted-foreground">
                   PDF or DOCX · up to 5 MB · we'll analyze automatically
                 </p>
@@ -68,9 +91,13 @@ function Resume() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium">{versions[0].file}</div>
-              <div className="text-[11px] text-muted-foreground">v4 · uploaded {versions[0].date}</div>
+              <div className="text-[11px] text-muted-foreground">
+                v4 · uploaded {versions[0].date}
+              </div>
             </div>
-            <span className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success">Analyzed</span>
+            <span className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success">
+              Analyzed
+            </span>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center">
             <Mini label="Readiness" value="78" />
@@ -94,7 +121,9 @@ function Resume() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs font-medium">Version history</div>
-              <div className="text-xs text-muted-foreground">All resumes stay private to your workspace.</div>
+              <div className="text-xs text-muted-foreground">
+                All resumes stay private to your workspace.
+              </div>
             </div>
             <button className="text-xs text-primary hover:underline">Export all</button>
           </div>
@@ -107,12 +136,21 @@ function Resume() {
               <div className="col-span-2 text-right">Actions</div>
             </div>
             {versions.map((v) => (
-              <div key={v.v} className="grid grid-cols-12 items-center gap-3 border-b border-border bg-background px-4 py-3 last:border-b-0 text-sm">
+              <div
+                key={v.v}
+                className="grid grid-cols-12 items-center gap-3 border-b border-border bg-background px-4 py-3 last:border-b-0 text-sm"
+              >
                 <div className="col-span-1">
-                  <span className={
-                    "rounded-md border px-1.5 py-0.5 text-[11px] font-medium " +
-                    (v.current ? "border-primary bg-primary-soft text-primary" : "border-border bg-surface text-muted-foreground")
-                  }>{v.v}</span>
+                  <span
+                    className={
+                      "rounded-md border px-1.5 py-0.5 text-[11px] font-medium " +
+                      (v.current
+                        ? "border-primary bg-primary-soft text-primary"
+                        : "border-border bg-surface text-muted-foreground")
+                    }
+                  >
+                    {v.v}
+                  </span>
                 </div>
                 <div className="col-span-5 min-w-0">
                   <div className="truncate font-medium">{v.file}</div>
@@ -123,14 +161,23 @@ function Resume() {
                   <div className="flex items-center gap-2">
                     <span className="w-6 text-xs tabular-nums">{v.score}</span>
                     <div className="h-1 flex-1 rounded-full bg-border">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${v.score}%` }} />
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${v.score}%` }}
+                      />
                     </div>
                   </div>
                 </div>
                 <div className="col-span-2 flex items-center justify-end gap-1 text-muted-foreground">
-                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><Download className="h-3.5 w-3.5" /></button>
-                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><Trash2 className="h-3.5 w-3.5" /></button>
-                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground"><MoreHorizontal className="h-3.5 w-3.5" /></button>
+                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground">
+                    <Download className="h-3.5 w-3.5" />
+                  </button>
+                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                  <button className="grid h-7 w-7 place-items-center rounded-md hover:bg-accent hover:text-foreground">
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
             ))}

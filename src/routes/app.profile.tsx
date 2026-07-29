@@ -10,15 +10,23 @@ export const Route = createFileRoute("/app/profile")({
 function Profile() {
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader eyebrow="Profile" title="Account & preferences" description="Manage your identity, journeys and workspace settings." />
+      <PageHeader
+        eyebrow="Profile"
+        title="Account & preferences"
+        description="Manage your identity, journeys and workspace settings."
+      />
 
       <div className="grid grid-cols-12 gap-4">
         <section className="col-span-12 rounded-xl border border-border bg-card p-6 shadow-xs lg:col-span-4">
           <div className="flex flex-col items-center text-center">
-            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-semibold text-primary-foreground">AK</div>
+            <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-semibold text-primary-foreground">
+              AK
+            </div>
             <div className="mt-3 text-base font-semibold">Arjun Kumar</div>
             <div className="text-xs text-muted-foreground">arjun.k@gmail.com</div>
-            <span className="mt-2 rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-medium text-primary">Free plan</span>
+            <span className="mt-2 rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-medium text-primary">
+              Free plan
+            </span>
           </div>
           <div className="mt-6 grid grid-cols-3 gap-2 text-center">
             {[
@@ -28,7 +36,9 @@ function Profile() {
             ].map(([l, v]) => (
               <div key={l} className="rounded-lg border border-border bg-background py-2">
                 <div className="text-base font-semibold tabular-nums">{v}</div>
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{l}</div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {l}
+                </div>
               </div>
             ))}
           </div>
@@ -61,9 +71,23 @@ function Profile() {
           <section className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <div className="text-xs font-medium">Preferences</div>
             <div className="mt-3 divide-y divide-border">
-              <Toggle icon={<Moon className="h-4 w-4" />} title="Dark mode" sub="Use system or pick a theme." />
-              <Toggle icon={<Bell className="h-4 w-4" />} title="Email notifications" sub="Weekly digest + nudges." on />
-              <Toggle icon={<Shield className="h-4 w-4" />} title="Make resume private" sub="Never used to train models." on />
+              <Toggle
+                icon={<Moon className="h-4 w-4" />}
+                title="Dark mode"
+                sub="Use system or pick a theme."
+              />
+              <Toggle
+                icon={<Bell className="h-4 w-4" />}
+                title="Email notifications"
+                sub="Weekly digest + nudges."
+                on
+              />
+              <Toggle
+                icon={<Shield className="h-4 w-4" />}
+                title="Make resume private"
+                sub="Never used to train models."
+                on
+              />
             </div>
           </section>
 
@@ -85,7 +109,9 @@ function Profile() {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="mb-1 block text-[11px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       <input
         defaultValue={value}
         className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
@@ -94,10 +120,22 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Toggle({ icon, title, sub, on }: { icon: React.ReactNode; title: string; sub: string; on?: boolean }) {
+function Toggle({
+  icon,
+  title,
+  sub,
+  on,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  sub: string;
+  on?: boolean;
+}) {
   return (
     <div className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-      <span className="grid h-8 w-8 place-items-center rounded-md border border-border bg-background text-muted-foreground">{icon}</span>
+      <span className="grid h-8 w-8 place-items-center rounded-md border border-border bg-background text-muted-foreground">
+        {icon}
+      </span>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium">{title}</div>
         <div className="text-[11px] text-muted-foreground">{sub}</div>

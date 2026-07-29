@@ -70,13 +70,24 @@ function MarketingNav() {
           </span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <a href="#features" className="hover:text-foreground">Features</a>
-          <a href="#how" className="hover:text-foreground">How it works</a>
-          <a href="#roadmap" className="hover:text-foreground">Roadmap</a>
-          <a href="#faq" className="hover:text-foreground">FAQ</a>
+          <a href="#features" className="hover:text-foreground">
+            Features
+          </a>
+          <a href="#how" className="hover:text-foreground">
+            How it works
+          </a>
+          <a href="#roadmap" className="hover:text-foreground">
+            Roadmap
+          </a>
+          <a href="#faq" className="hover:text-foreground">
+            FAQ
+          </a>
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <Link to="/auth" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">
+          <Link
+            to="/auth"
+            className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline"
+          >
             Sign in
           </Link>
           <Link
@@ -103,7 +114,8 @@ function Hero() {
             <ChevronRight className="h-3 w-3" />
           </span>
           <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight sm:text-6xl">
-            Navigate your engineering<br className="hidden sm:inline" /> career with{" "}
+            Navigate your engineering
+            <br className="hidden sm:inline" /> career with{" "}
             <span className="bg-gradient-to-r from-primary to-[oklch(0.66_0.14_235)] bg-clip-text text-transparent">
               precision
             </span>
@@ -128,9 +140,15 @@ function Hero() {
             </a>
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> No credit card</span>
-            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Resume stays private</span>
-            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-success" /> Built for engineers</span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" /> No credit card
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" /> Resume stays private
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" /> Built for engineers
+            </span>
           </div>
         </div>
 
@@ -218,13 +236,15 @@ function HeroAppPreview() {
                         (tone === "destructive"
                           ? "bg-destructive"
                           : tone === "warning"
-                          ? "bg-warning"
-                          : "bg-primary")
+                            ? "bg-warning"
+                            : "bg-primary")
                       }
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="w-6 text-right tabular-nums text-muted-foreground">{pct as number}</span>
+                  <span className="w-6 text-right tabular-nums text-muted-foreground">
+                    {pct as number}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -247,7 +267,11 @@ function MiniStat({
   tone: "primary" | "success" | "info";
 }) {
   const bg =
-    tone === "primary" ? "bg-primary" : tone === "success" ? "bg-success" : "bg-[oklch(0.66_0.14_235)]";
+    tone === "primary"
+      ? "bg-primary"
+      : tone === "success"
+        ? "bg-success"
+        : "bg-[oklch(0.66_0.14_235)]";
   return (
     <div className="rounded-lg border border-border p-3">
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
@@ -296,7 +320,10 @@ function LogoStrip() {
         </p>
         <div className="mt-5 grid grid-cols-3 gap-x-8 gap-y-4 opacity-70 sm:grid-cols-6">
           {names.map((n) => (
-            <div key={n} className="text-center text-sm font-semibold tracking-tight text-muted-foreground">
+            <div
+              key={n}
+              className="text-center text-sm font-semibold tracking-tight text-muted-foreground"
+            >
               {n}
             </div>
           ))}
@@ -365,12 +392,36 @@ function Features() {
 
 function HowItWorks() {
   const steps = [
-    { n: "01", t: "Create a journey", d: "Pick a target role, experience level, timeline and daily hours." },
-    { n: "02", t: "Upload your resume", d: "Drag in your PDF or DOCX. We parse, structure and version it." },
-    { n: "03", t: "Validate your experience", d: "Answer a handful of focused questions to confirm what's real." },
-    { n: "04", t: "See your readiness", d: "Get a score, a breakdown and a prioritized list of gaps." },
-    { n: "05", t: "Follow the roadmap", d: "Sprints, modules and daily tasks tailored to your timeline." },
-    { n: "06", t: "Re-analyze and compare", d: "Update your resume. Compare versions. Watch the score climb." },
+    {
+      n: "01",
+      t: "Create a journey",
+      d: "Pick a target role, experience level, timeline and daily hours.",
+    },
+    {
+      n: "02",
+      t: "Upload your resume",
+      d: "Drag in your PDF or DOCX. We parse, structure and version it.",
+    },
+    {
+      n: "03",
+      t: "Validate your experience",
+      d: "Answer a handful of focused questions to confirm what's real.",
+    },
+    {
+      n: "04",
+      t: "See your readiness",
+      d: "Get a score, a breakdown and a prioritized list of gaps.",
+    },
+    {
+      n: "05",
+      t: "Follow the roadmap",
+      d: "Sprints, modules and daily tasks tailored to your timeline.",
+    },
+    {
+      n: "06",
+      t: "Re-analyze and compare",
+      d: "Update your resume. Compare versions. Watch the score climb.",
+    },
   ];
   return (
     <section id="how" className="border-b border-border bg-surface/50">
@@ -441,8 +492,8 @@ function ResumeAnalysisPreview() {
                       (s.danger
                         ? "bg-destructive/10 text-destructive"
                         : s.warn
-                        ? "bg-warning/15 text-[oklch(0.45_0.13_75)]"
-                        : "bg-primary-soft text-primary")
+                          ? "bg-warning/15 text-[oklch(0.45_0.13_75)]"
+                          : "bg-primary-soft text-primary")
                     }
                   >
                     {s.tag}
@@ -468,10 +519,19 @@ function ResumeAnalysisPreview() {
 
 function RoadmapPreview() {
   const sprints = [
-    { name: "Sprint 1 · Foundations", mods: ["TypeScript deep dive", "Modern React patterns"], pct: 100, done: true },
+    {
+      name: "Sprint 1 · Foundations",
+      mods: ["TypeScript deep dive", "Modern React patterns"],
+      pct: 100,
+      done: true,
+    },
     { name: "Sprint 2 · Architecture", mods: ["Component design", "State management"], pct: 64 },
     { name: "Sprint 3 · System design", mods: ["Frontend at scale", "Caching & perf"], pct: 18 },
-    { name: "Sprint 4 · Interview prep", mods: ["Behavioral · STAR", "Live coding patterns"], pct: 0 },
+    {
+      name: "Sprint 4 · Interview prep",
+      mods: ["Behavioral · STAR", "Live coding patterns"],
+      pct: 0,
+    },
   ];
   return (
     <section id="roadmap" className="border-b border-border bg-surface/50">
@@ -488,7 +548,10 @@ function RoadmapPreview() {
             <div className="col-span-3 text-right">Progress</div>
           </div>
           {sprints.map((s, i) => (
-            <div key={s.name} className="grid grid-cols-12 items-center gap-4 border-b border-border px-5 py-4 last:border-b-0">
+            <div
+              key={s.name}
+              className="grid grid-cols-12 items-center gap-4 border-b border-border px-5 py-4 last:border-b-0"
+            >
               <div className="col-span-12 md:col-span-5">
                 <div className="flex items-center gap-2">
                   <div
@@ -497,8 +560,8 @@ function RoadmapPreview() {
                       (s.done
                         ? "bg-success/15 text-success"
                         : i === 1
-                        ? "bg-primary-soft text-primary"
-                        : "bg-surface text-muted-foreground border border-border")
+                          ? "bg-primary-soft text-primary"
+                          : "bg-surface text-muted-foreground border border-border")
                     }
                   >
                     {s.done ? "✓" : i + 1}
@@ -508,7 +571,10 @@ function RoadmapPreview() {
               </div>
               <div className="col-span-12 hidden flex-wrap gap-1.5 md:col-span-4 md:flex">
                 {s.mods.map((m) => (
-                  <span key={m} className="rounded-md border border-border bg-surface px-2 py-0.5 text-[11px] text-muted-foreground">
+                  <span
+                    key={m}
+                    className="rounded-md border border-border bg-surface px-2 py-0.5 text-[11px] text-muted-foreground"
+                  >
                     {m}
                   </span>
                 ))}
@@ -521,7 +587,9 @@ function RoadmapPreview() {
                       style={{ width: `${s.pct}%` }}
                     />
                   </div>
-                  <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">{s.pct}%</span>
+                  <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
+                    {s.pct}%
+                  </span>
                 </div>
               </div>
             </div>
@@ -539,8 +607,12 @@ function InsightsPreview() {
         <div className="order-2 rounded-xl border border-border bg-card p-6 shadow-sm lg:order-1">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Readiness</div>
-              <div className="mt-1 text-4xl font-semibold tabular-nums">78<span className="text-base text-muted-foreground">/100</span></div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Readiness
+              </div>
+              <div className="mt-1 text-4xl font-semibold tabular-nums">
+                78<span className="text-base text-muted-foreground">/100</span>
+              </div>
               <div className="mt-1 text-xs text-success">+12 since last analysis</div>
             </div>
             <RadialScore value={78} />
@@ -561,7 +633,11 @@ function InsightsPreview() {
                   <div
                     className={
                       "h-full rounded-full " +
-                      (tone === "destructive" ? "bg-destructive" : tone === "success" ? "bg-success" : "bg-primary")
+                      (tone === "destructive"
+                        ? "bg-destructive"
+                        : tone === "success"
+                          ? "bg-success"
+                          : "bg-primary")
                     }
                     style={{ width: `${v}%` }}
                   />
@@ -642,11 +718,15 @@ function ComparisonPreview() {
             <div key={c.v} className="rounded-lg border border-border bg-background p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[11px] font-medium">{c.v}</span>
+                  <span className="rounded-md border border-border bg-surface px-2 py-0.5 text-[11px] font-medium">
+                    {c.v}
+                  </span>
                   <span className="text-xs text-muted-foreground">{c.date}</span>
                 </div>
                 {c.current && (
-                  <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary">Current</span>
+                  <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                    Current
+                  </span>
                 )}
               </div>
               <div className="mt-4 flex items-end gap-3">
@@ -677,15 +757,21 @@ function ComparisonPreview() {
   );
 }
 
-function DiffRow({ children, tone }: { children: React.ReactNode; tone: "add" | "rem" | "warn" | "muted" }) {
+function DiffRow({
+  children,
+  tone,
+}: {
+  children: React.ReactNode;
+  tone: "add" | "rem" | "warn" | "muted";
+}) {
   const cls =
     tone === "add"
       ? "text-success"
       : tone === "rem"
-      ? "text-destructive"
-      : tone === "warn"
-      ? "text-[oklch(0.55_0.15_75)]"
-      : "text-muted-foreground";
+        ? "text-destructive"
+        : tone === "warn"
+          ? "text-[oklch(0.55_0.15_75)]"
+          : "text-muted-foreground";
   return <div className={"text-sm " + cls}>{children}</div>;
 }
 
@@ -713,13 +799,18 @@ function Testimonials() {
         <SectionHeading eyebrow="Loved by engineers" title="Quiet tool. Loud results." />
         <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
           {items.map((t) => (
-            <figure key={t.a} className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-xs">
+            <figure
+              key={t.a}
+              className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-xs"
+            >
               <div className="flex gap-0.5 text-warning">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="h-3.5 w-3.5 fill-current" />
                 ))}
               </div>
-              <blockquote className="mt-3 text-[15px] leading-relaxed text-foreground">"{t.q}"</blockquote>
+              <blockquote className="mt-3 text-[15px] leading-relaxed text-foreground">
+                "{t.q}"
+              </blockquote>
               <figcaption className="mt-5 text-sm">
                 <div className="font-medium">{t.a}</div>
                 <div className="text-muted-foreground">{t.r}</div>
@@ -734,11 +825,26 @@ function Testimonials() {
 
 function FAQ() {
   const qs = [
-    { q: "Is my resume data private?", a: "Yes. Your resume is encrypted at rest and never used to train models. You can delete every version with one click." },
-    { q: "Which roles are supported?", a: "Frontend, full-stack, React, Next.js, and platform engineering today. Backend, mobile and ML are rolling out next." },
-    { q: "How accurate is the readiness score?", a: "The score blends parsed resume signals with validated answers. It's calibrated against real hiring rubrics — not vibes." },
-    { q: "Do I need to know what I'm targeting?", a: "No. The journey wizard helps you pick a role, level and timeline that's realistic for your current resume." },
-    { q: "Is there a free plan?", a: "Yes. 5 analyses, 2 resume versions and one active journey. No credit card needed." },
+    {
+      q: "Is my resume data private?",
+      a: "Yes. Your resume is encrypted at rest and never used to train models. You can delete every version with one click.",
+    },
+    {
+      q: "Which roles are supported?",
+      a: "Frontend, full-stack, React, Next.js, and platform engineering today. Backend, mobile and ML are rolling out next.",
+    },
+    {
+      q: "How accurate is the readiness score?",
+      a: "The score blends parsed resume signals with validated answers. It's calibrated against real hiring rubrics — not vibes.",
+    },
+    {
+      q: "Do I need to know what I'm targeting?",
+      a: "No. The journey wizard helps you pick a role, level and timeline that's realistic for your current resume.",
+    },
+    {
+      q: "Is there a free plan?",
+      a: "Yes. 5 analyses, 2 resume versions and one active journey. No credit card needed.",
+    },
   ];
   return (
     <section id="faq" className="border-b border-border bg-surface/50">
@@ -768,7 +874,9 @@ function CTA() {
           <div className="absolute inset-0 dot-bg opacity-[0.08]" />
           <div className="relative grid grid-cols-1 items-center gap-6 p-8 sm:p-12 lg:grid-cols-[1fr_auto]">
             <div>
-              <div className="text-xs uppercase tracking-widest text-background/60">Ready when you are</div>
+              <div className="text-xs uppercase tracking-widest text-background/60">
+                Ready when you are
+              </div>
               <h3 className="mt-2 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
                 Stop guessing. Start shipping a career roadmap.
               </h3>
@@ -813,13 +921,22 @@ function Footer() {
             The career operating system for software engineers.
           </p>
           <div className="mt-4 flex items-center gap-2 text-muted-foreground">
-            <a href="#" className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground">
+            <a
+              href="#"
+              className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground"
+            >
               <Github className="h-4 w-4" />
             </a>
-            <a href="#" className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground">
+            <a
+              href="#"
+              className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground"
+            >
               <Zap className="h-4 w-4" />
             </a>
-            <a href="#" className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground">
+            <a
+              href="#"
+              className="grid h-8 w-8 place-items-center rounded-md border border-border hover:text-foreground"
+            >
               <ShieldCheck className="h-4 w-4" />
             </a>
           </div>
@@ -830,11 +947,15 @@ function Footer() {
           { h: "Legal", l: ["Privacy", "Terms", "Security", "Contact"] },
         ].map((col) => (
           <div key={col.h}>
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{col.h}</div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {col.h}
+            </div>
             <ul className="mt-3 space-y-2">
               {col.l.map((x) => (
                 <li key={x}>
-                  <a href="#" className="text-foreground/80 hover:text-foreground">{x}</a>
+                  <a href="#" className="text-foreground/80 hover:text-foreground">
+                    {x}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -877,6 +998,8 @@ function SectionHeading({
 
 function SectionEyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[11px] font-semibold uppercase tracking-widest text-primary">{children}</span>
+    <span className="text-[11px] font-semibold uppercase tracking-widest text-primary">
+      {children}
+    </span>
   );
 }

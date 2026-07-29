@@ -9,21 +9,33 @@ export const Route = createFileRoute("/app/suggestions")({
 
 const groups = [
   {
-    p: "High", tone: "destructive", items: [
+    p: "High",
+    tone: "destructive",
+    items: [
       { t: "Quantify outcomes on top 3 projects", d: "Add metrics: % faster, $ saved, # users." },
-      { t: "Demonstrate system design", d: "Mention scale, caching, trade-offs in dashboard role." },
+      {
+        t: "Demonstrate system design",
+        d: "Mention scale, caching, trade-offs in dashboard role.",
+      },
       { t: "Show ownership scope", d: "'Led', 'Owned', 'Designed' instead of 'Worked on'." },
     ],
   },
   {
-    p: "Medium", tone: "warning", items: [
-      { t: "Group skills by category", d: "Frontend, Language, Testing, Tooling — easier to skim." },
+    p: "Medium",
+    tone: "warning",
+    items: [
+      {
+        t: "Group skills by category",
+        d: "Frontend, Language, Testing, Tooling — easier to skim.",
+      },
       { t: "Add testing depth", d: "Specify Vitest, Playwright, coverage % if known." },
       { t: "Tighten summary to 2 lines", d: "Lead with role, scale, focus area." },
     ],
   },
   {
-    p: "Low", tone: "primary", items: [
+    p: "Low",
+    tone: "primary",
+    items: [
       { t: "Add GitHub & portfolio links", d: "One-click for recruiters." },
       { t: "Remove outdated tech (jQuery, Bootstrap 3)", d: "Signals modernity." },
       { t: "Use consistent date format", d: "MMM YYYY across all entries." },
@@ -43,7 +55,8 @@ function Suggestions() {
             to="/app/resume"
             className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
-            <Wand2 className="h-3.5 w-3.5" /> Apply & re-analyze <ArrowRight className="h-3.5 w-3.5" />
+            <Wand2 className="h-3.5 w-3.5" /> Apply & re-analyze{" "}
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         }
       />
@@ -59,8 +72,8 @@ function Suggestions() {
                     (g.tone === "destructive"
                       ? "bg-destructive/10 text-destructive"
                       : g.tone === "warning"
-                      ? "bg-warning/15 text-[oklch(0.45_0.13_75)]"
-                      : "bg-primary-soft text-primary")
+                        ? "bg-warning/15 text-[oklch(0.45_0.13_75)]"
+                        : "bg-primary-soft text-primary")
                   }
                 >
                   {g.p} priority
@@ -78,12 +91,18 @@ function Suggestions() {
                     </span>
                     <div className="min-w-0">
                       <div className="text-sm font-medium">{i.t}</div>
-                      <div className="mt-1 text-[12px] leading-snug text-muted-foreground">{i.d}</div>
+                      <div className="mt-1 text-[12px] leading-snug text-muted-foreground">
+                        {i.d}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-3 flex justify-end gap-1.5">
-                    <button className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent">Skip</button>
-                    <button className="rounded-md bg-foreground px-2 py-1 text-[11px] font-medium text-background hover:opacity-90">Apply</button>
+                    <button className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent">
+                      Skip
+                    </button>
+                    <button className="rounded-md bg-foreground px-2 py-1 text-[11px] font-medium text-background hover:opacity-90">
+                      Apply
+                    </button>
                   </div>
                 </div>
               ))}

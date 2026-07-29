@@ -20,9 +20,7 @@ function Auth() {
         </div>
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Sign in to continue your journey.
-          </p>
+          <p className="mt-1.5 text-sm text-muted-foreground">Sign in to continue your journey.</p>
 
           <div className="mt-8 space-y-2">
             <button className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border bg-card text-sm font-medium shadow-xs hover:bg-accent">
@@ -40,13 +38,20 @@ function Auth() {
           </div>
 
           <form className="space-y-3">
-            <Field label="Email" type="email" placeholder="you@company.com" icon={<Mail className="h-4 w-4" />} />
+            <Field
+              label="Email"
+              type="email"
+              placeholder="you@company.com"
+              icon={<Mail className="h-4 w-4" />}
+            />
             <Field label="Password" type="password" placeholder="••••••••" />
             <div className="flex items-center justify-between text-xs">
               <label className="inline-flex items-center gap-2 text-muted-foreground">
                 <input type="checkbox" className="h-3.5 w-3.5 rounded border-border" /> Remember me
               </label>
-              <a href="#" className="text-primary hover:underline">Forgot password?</a>
+              <a href="#" className="text-primary hover:underline">
+                Forgot password?
+              </a>
             </div>
             <Link
               to="/app/dashboard"

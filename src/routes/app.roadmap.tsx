@@ -10,7 +10,13 @@ export const Route = createFileRoute("/app/roadmap")({
 
 type Task = { t: string; m: string; done?: boolean };
 type Mod = { name: string; pct: number; tasks: Task[] };
-type Sprint = { name: string; range: string; modules: Mod[]; pct: number; status: "Done" | "Active" | "Upcoming" };
+type Sprint = {
+  name: string;
+  range: string;
+  modules: Mod[];
+  pct: number;
+  status: "Done" | "Active" | "Upcoming";
+};
 
 const data: Sprint[] = [
   {
@@ -19,8 +25,22 @@ const data: Sprint[] = [
     pct: 100,
     status: "Done",
     modules: [
-      { name: "TypeScript deep dive", pct: 100, tasks: [{ t: "Generics & constraints", m: "1h", done: true }, { t: "Conditional types", m: "1h", done: true }] },
-      { name: "Modern React patterns", pct: 100, tasks: [{ t: "Compound components", m: "45m", done: true }, { t: "Suspense & transitions", m: "1h", done: true }] },
+      {
+        name: "TypeScript deep dive",
+        pct: 100,
+        tasks: [
+          { t: "Generics & constraints", m: "1h", done: true },
+          { t: "Conditional types", m: "1h", done: true },
+        ],
+      },
+      {
+        name: "Modern React patterns",
+        pct: 100,
+        tasks: [
+          { t: "Compound components", m: "45m", done: true },
+          { t: "Suspense & transitions", m: "1h", done: true },
+        ],
+      },
     ],
   },
   {
@@ -29,9 +49,33 @@ const data: Sprint[] = [
     pct: 64,
     status: "Active",
     modules: [
-      { name: "Component design", pct: 90, tasks: [{ t: "API design heuristics", m: "1h", done: true }, { t: "Props, slots, polymorphism", m: "45m", done: true }, { t: "Refactor: Form library", m: "2h" }] },
-      { name: "State management", pct: 50, tasks: [{ t: "Local vs server state", m: "30m", done: true }, { t: "Zustand patterns", m: "1h" }, { t: "URL as state", m: "45m" }] },
-      { name: "Data fetching", pct: 40, tasks: [{ t: "TanStack Query mental model", m: "1h", done: true }, { t: "Mutations & cache", m: "1h" }, { t: "Optimistic UI", m: "45m" }] },
+      {
+        name: "Component design",
+        pct: 90,
+        tasks: [
+          { t: "API design heuristics", m: "1h", done: true },
+          { t: "Props, slots, polymorphism", m: "45m", done: true },
+          { t: "Refactor: Form library", m: "2h" },
+        ],
+      },
+      {
+        name: "State management",
+        pct: 50,
+        tasks: [
+          { t: "Local vs server state", m: "30m", done: true },
+          { t: "Zustand patterns", m: "1h" },
+          { t: "URL as state", m: "45m" },
+        ],
+      },
+      {
+        name: "Data fetching",
+        pct: 40,
+        tasks: [
+          { t: "TanStack Query mental model", m: "1h", done: true },
+          { t: "Mutations & cache", m: "1h" },
+          { t: "Optimistic UI", m: "45m" },
+        ],
+      },
     ],
   },
   {
@@ -40,8 +84,22 @@ const data: Sprint[] = [
     pct: 18,
     status: "Upcoming",
     modules: [
-      { name: "Frontend at scale", pct: 25, tasks: [{ t: "Module federation", m: "1h" }, { t: "Monorepos & boundaries", m: "1h" }] },
-      { name: "Caching & performance", pct: 10, tasks: [{ t: "HTTP caching", m: "45m" }, { t: "Lighthouse budgets", m: "45m" }] },
+      {
+        name: "Frontend at scale",
+        pct: 25,
+        tasks: [
+          { t: "Module federation", m: "1h" },
+          { t: "Monorepos & boundaries", m: "1h" },
+        ],
+      },
+      {
+        name: "Caching & performance",
+        pct: 10,
+        tasks: [
+          { t: "HTTP caching", m: "45m" },
+          { t: "Lighthouse budgets", m: "45m" },
+        ],
+      },
     ],
   },
   {
@@ -51,7 +109,11 @@ const data: Sprint[] = [
     status: "Upcoming",
     modules: [
       { name: "Behavioral · STAR", pct: 0, tasks: [{ t: "Story bank", m: "1h" }] },
-      { name: "Live coding patterns", pct: 0, tasks: [{ t: "Mock: design a debouncer", m: "45m" }] },
+      {
+        name: "Live coding patterns",
+        pct: 0,
+        tasks: [{ t: "Mock: design a debouncer", m: "45m" }],
+      },
     ],
   },
 ];
@@ -99,7 +161,11 @@ function Roadmap() {
             const sprintIdx = i < 3 ? 0 : i < 6 ? 1 : i < 9 ? 2 : 3;
             const s = data[sprintIdx];
             const tone =
-              s.status === "Done" ? "bg-success" : s.status === "Active" ? "bg-primary" : "bg-border";
+              s.status === "Done"
+                ? "bg-success"
+                : s.status === "Active"
+                  ? "bg-primary"
+                  : "bg-border";
             return (
               <div key={i} className="flex flex-col items-center gap-1.5">
                 <div className={"h-2 w-full rounded-full " + tone} />
@@ -120,18 +186,27 @@ function Roadmap() {
         {data.map((s) => {
           const isOpen = !!open[s.name];
           return (
-            <section key={s.name} className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+            <section
+              key={s.name}
+              className="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+            >
               <button
                 onClick={() => setOpen((o) => ({ ...o, [s.name]: !isOpen }))}
                 className="grid w-full grid-cols-12 items-center gap-4 px-5 py-4 text-left hover:bg-accent/30"
               >
                 <div className="col-span-12 flex items-center gap-3 md:col-span-5">
                   <span className="grid h-7 w-7 place-items-center rounded-md border border-border bg-surface text-muted-foreground">
-                    {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                    {isOpen ? (
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    ) : (
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    )}
                   </span>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold">{s.name}</div>
-                    <div className="text-[11px] text-muted-foreground">{s.range} · {s.modules.length} modules</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {s.range} · {s.modules.length} modules
+                    </div>
                   </div>
                 </div>
                 <div className="col-span-12 md:col-span-4">
@@ -141,11 +216,16 @@ function Roadmap() {
                   <div className="flex items-center justify-end gap-3">
                     <div className="h-1.5 w-32 overflow-hidden rounded-full bg-border">
                       <div
-                        className={"h-full rounded-full " + (s.status === "Done" ? "bg-success" : "bg-primary")}
+                        className={
+                          "h-full rounded-full " +
+                          (s.status === "Done" ? "bg-success" : "bg-primary")
+                        }
                         style={{ width: `${s.pct}%` }}
                       />
                     </div>
-                    <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">{s.pct}%</span>
+                    <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
+                      {s.pct}%
+                    </span>
                   </div>
                 </div>
               </button>
@@ -156,10 +236,15 @@ function Roadmap() {
                     <div key={m.name} className="rounded-lg border border-border bg-card p-4">
                       <div className="flex items-center justify-between">
                         <div className="text-sm font-medium">{m.name}</div>
-                        <span className="text-[10px] tabular-nums text-muted-foreground">{m.pct}%</span>
+                        <span className="text-[10px] tabular-nums text-muted-foreground">
+                          {m.pct}%
+                        </span>
                       </div>
                       <div className="mt-2 h-1 rounded-full bg-border">
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${m.pct}%` }} />
+                        <div
+                          className="h-full rounded-full bg-primary"
+                          style={{ width: `${m.pct}%` }}
+                        />
                       </div>
                       <ul className="mt-3 space-y-1.5">
                         {m.tasks.map((t) => (
@@ -169,7 +254,13 @@ function Roadmap() {
                             ) : (
                               <Circle className="h-3.5 w-3.5 text-muted-foreground" />
                             )}
-                            <span className={"flex-1 " + (t.done ? "text-muted-foreground line-through" : "")}>{t.t}</span>
+                            <span
+                              className={
+                                "flex-1 " + (t.done ? "text-muted-foreground line-through" : "")
+                              }
+                            >
+                              {t.t}
+                            </span>
                             <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                               <Clock className="h-3 w-3" /> {t.m}
                             </span>
@@ -193,9 +284,11 @@ function StatusBadge({ s }: { s: Sprint["status"] }) {
     s === "Done"
       ? "bg-success/10 text-success"
       : s === "Active"
-      ? "bg-primary-soft text-primary"
-      : "bg-surface text-muted-foreground border border-border";
-  return <span className={"inline-flex rounded-md px-2 py-0.5 text-[11px] font-medium " + cls}>{s}</span>;
+        ? "bg-primary-soft text-primary"
+        : "bg-surface text-muted-foreground border border-border";
+  return (
+    <span className={"inline-flex rounded-md px-2 py-0.5 text-[11px] font-medium " + cls}>{s}</span>
+  );
 }
 
 function Legend({ dot, label }: { dot: string; label: string }) {

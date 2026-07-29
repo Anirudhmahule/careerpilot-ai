@@ -34,8 +34,8 @@ function Journey() {
                 (i < step
                   ? "bg-success/15 text-success"
                   : i === step
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-surface text-muted-foreground border border-border")
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-surface text-muted-foreground border border-border")
               }
             >
               {i < step ? <Check className="h-3 w-3" /> : i + 1}
@@ -130,7 +130,9 @@ function Journey() {
                 ["Daily focus", hours],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-lg border border-border bg-surface p-4">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{k}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {k}
+                  </div>
                   <div className="mt-1 text-sm font-medium">{v}</div>
                 </div>
               ))}
@@ -237,7 +239,15 @@ function SelectableCard({
   );
 }
 
-function ChipCard({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function ChipCard({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
   return (
     <button
       onClick={onClick}

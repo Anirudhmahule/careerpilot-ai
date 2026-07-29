@@ -43,7 +43,9 @@ function Insights() {
             onClick={() => setTab(t)}
             className={
               "shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-colors " +
-              (tab === t ? "bg-primary-soft text-primary" : "text-muted-foreground hover:text-foreground")
+              (tab === t
+                ? "bg-primary-soft text-primary"
+                : "text-muted-foreground hover:text-foreground")
             }
           >
             {t}
@@ -152,7 +154,15 @@ function Readiness() {
 }
 
 function SkillsTab() {
-  const strong = ["React", "TypeScript (mid)", "Next.js", "Tailwind", "Vite", "Git", "Accessibility"];
+  const strong = [
+    "React",
+    "TypeScript (mid)",
+    "Next.js",
+    "Tailwind",
+    "Vite",
+    "Git",
+    "Accessibility",
+  ];
   const weak = ["TypeScript generics", "Testing (Playwright)", "Performance", "RSC patterns"];
   const missing = ["System design", "GraphQL", "Web workers", "Real-time (WebSocket)"];
   return (
@@ -192,19 +202,27 @@ function SkillsTab() {
                         <div
                           className={
                             "h-full rounded-full " +
-                            ((lvl as number) >= 70 ? "bg-success" : (lvl as number) >= 45 ? "bg-primary" : "bg-destructive")
+                            ((lvl as number) >= 70
+                              ? "bg-success"
+                              : (lvl as number) >= 45
+                                ? "bg-primary"
+                                : "bg-destructive")
                           }
                           style={{ width: `${lvl}%` }}
                         />
                       </div>
-                      <span className="w-6 text-right text-[11px] tabular-nums text-muted-foreground">{lvl as number}</span>
+                      <span className="w-6 text-right text-[11px] tabular-nums text-muted-foreground">
+                        {lvl as number}
+                      </span>
                     </div>
                   </td>
                   <td className="py-2.5">
                     <span
                       className={
                         "rounded-md px-1.5 py-0.5 text-[10px] font-medium " +
-                        (val ? "bg-success/10 text-success" : "bg-warning/15 text-[oklch(0.45_0.13_75)]")
+                        (val
+                          ? "bg-success/10 text-success"
+                          : "bg-warning/15 text-[oklch(0.45_0.13_75)]")
                       }
                     >
                       {val ? "Yes" : "Pending"}
@@ -250,15 +268,17 @@ function Gaps() {
             </span>
           </div>
           <ul className="mt-3 space-y-2">
-            {items.filter((i) => i.p === b).map((g) => (
-              <li key={g.s} className="rounded-lg border border-border p-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{g.s}</span>
-                  <span className="text-[10px] text-muted-foreground">{g.est}</span>
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">{g.w}</p>
-              </li>
-            ))}
+            {items
+              .filter((i) => i.p === b)
+              .map((g) => (
+                <li key={g.s} className="rounded-lg border border-border p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">{g.s}</span>
+                    <span className="text-[10px] text-muted-foreground">{g.est}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{g.w}</p>
+                </li>
+              ))}
           </ul>
         </section>
       ))}
@@ -269,7 +289,12 @@ function Gaps() {
 function RoleMatch() {
   const roles = [
     { r: "Frontend Engineer", m: 86, fit: ["React", "TS", "Next.js"], miss: ["Sys design"] },
-    { r: "React Developer", m: 81, fit: ["React", "Patterns", "Tailwind"], miss: ["Testing", "Perf"] },
+    {
+      r: "React Developer",
+      m: 81,
+      fit: ["React", "Patterns", "Tailwind"],
+      miss: ["Testing", "Perf"],
+    },
     { r: "Next.js Developer", m: 74, fit: ["Next.js", "RSC", "Edge"], miss: ["GraphQL"] },
     { r: "Full-stack Engineer", m: 58, fit: ["React"], miss: ["Node", "DB", "Sys design"] },
   ];
@@ -284,7 +309,9 @@ function RoleMatch() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-semibold tabular-nums">{r.m}%</div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">match</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                match
+              </div>
             </div>
           </div>
           <div className="mt-3 h-1.5 rounded-full bg-border">
@@ -292,18 +319,32 @@ function RoleMatch() {
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Strong match</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Strong match
+              </div>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {r.fit.map((f) => (
-                  <span key={f} className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success">{f}</span>
+                  <span
+                    key={f}
+                    className="rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success"
+                  >
+                    {f}
+                  </span>
                 ))}
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Missing</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Missing
+              </div>
               <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {r.miss.map((m) => (
-                  <span key={m} className="rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">{m}</span>
+                  <span
+                    key={m}
+                    className="rounded-md bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive"
+                  >
+                    {m}
+                  </span>
                 ))}
               </div>
             </div>
@@ -322,7 +363,14 @@ function ScoreRing({ value, large }: { value: number; large?: boolean }) {
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="oklch(0.92 0.008 255)" strokeWidth={large ? 10 : 8} fill="none" />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke="oklch(0.92 0.008 255)"
+          strokeWidth={large ? 10 : 8}
+          fill="none"
+        />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -336,7 +384,9 @@ function ScoreRing({ value, large }: { value: number; large?: boolean }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className={(large ? "text-5xl" : "text-3xl") + " font-semibold tabular-nums"}>{value}</span>
+        <span className={(large ? "text-5xl" : "text-3xl") + " font-semibold tabular-nums"}>
+          {value}
+        </span>
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">/ 100</span>
       </div>
     </div>
@@ -352,18 +402,31 @@ function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
-function SkillColumn({ title, tone, items }: { title: string; tone: "success" | "warning" | "destructive"; items: string[] }) {
-  const dotCls = tone === "success" ? "bg-success" : tone === "warning" ? "bg-warning" : "bg-destructive";
+function SkillColumn({
+  title,
+  tone,
+  items,
+}: {
+  title: string;
+  tone: "success" | "warning" | "destructive";
+  items: string[];
+}) {
+  const dotCls =
+    tone === "success" ? "bg-success" : tone === "warning" ? "bg-warning" : "bg-destructive";
   return (
     <section className="col-span-12 rounded-xl border border-border bg-card p-5 shadow-xs md:col-span-6 lg:col-span-4">
       <div className="flex items-center gap-2">
         <span className={"h-2 w-2 rounded-full " + dotCls} />
         <div className="text-xs font-medium">{title}</div>
-        <span className="ml-auto rounded-md bg-surface px-1.5 py-0.5 text-[10px] text-muted-foreground">{items.length}</span>
+        <span className="ml-auto rounded-md bg-surface px-1.5 py-0.5 text-[10px] text-muted-foreground">
+          {items.length}
+        </span>
       </div>
       <ul className="mt-3 flex flex-wrap gap-1.5">
         {items.map((i) => (
-          <li key={i} className="rounded-md border border-border bg-surface px-2 py-1 text-xs">{i}</li>
+          <li key={i} className="rounded-md border border-border bg-surface px-2 py-1 text-xs">
+            {i}
+          </li>
         ))}
       </ul>
     </section>

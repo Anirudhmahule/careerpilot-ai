@@ -18,7 +18,11 @@ const stages = [
 function Analysis() {
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader eyebrow="Analyzing" title="Reading your resume." description="This usually takes 20–40 seconds." />
+      <PageHeader
+        eyebrow="Analyzing"
+        title="Reading your resume."
+        description="This usually takes 20–40 seconds."
+      />
 
       <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="flex items-center justify-between">
@@ -44,8 +48,8 @@ function Analysis() {
                 (s.active
                   ? "border-primary/40 bg-primary-soft/40"
                   : s.done
-                  ? "border-border bg-background"
-                  : "border-border bg-background opacity-60")
+                    ? "border-border bg-background"
+                    : "border-border bg-background opacity-60")
               }
             >
               <span
@@ -54,11 +58,15 @@ function Analysis() {
                   (s.done
                     ? "bg-success/15 text-success"
                     : s.active
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-surface text-muted-foreground border border-border")
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-surface text-muted-foreground border border-border")
                 }
               >
-                {s.done ? <Check className="h-3.5 w-3.5" /> : s.active ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                {s.done ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : s.active ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : null}
               </span>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium">{s.t}</div>
@@ -72,7 +80,9 @@ function Analysis() {
         </ul>
 
         <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
-          <p className="text-xs text-muted-foreground">You can leave this page — we'll notify you.</p>
+          <p className="text-xs text-muted-foreground">
+            You can leave this page — we'll notify you.
+          </p>
           <Link
             to="/app/insights"
             className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-xs font-medium hover:bg-accent"
