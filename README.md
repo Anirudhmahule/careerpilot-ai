@@ -48,23 +48,6 @@ The user journey is designed to systematically evaluate and improve engineering 
 
 ---
 
-## Screenshots
-
-> [!NOTE]
-> _Screenshots will be added here upon final deployment._
-
-- **Landing Page**
-- **Dashboard Overview**
-- **Resume Management**
-- **Insights & Metrics**
-- **Validation Flow**
-- **Learning Roadmap**
-- **User Profile**
-- **Mobile View**
-- **Dark Mode Interface**
-
----
-
 ## Architecture
 
 The application follows a modern SSR architecture using TanStack Start, ensuring optimal performance and SEO while maintaining a rich interactive client.
@@ -215,11 +198,54 @@ npm run format     # Format code with Prettier
 
 ## Deployment
 
-The application is designed for edge deployment.
+This is a **TanStack Start SSR app**. Static hosting of `dist/client` alone will 404 — Nitro must produce platform-specific server output during build.
 
-- **Frontend & SSR**: Deployed via Vercel/Cloudflare Pages utilizing TanStack Start's server build.
-- **Database**: Managed Supabase PostgreSQL instance.
-- **Authentication**: Handled at the edge using Supabase Auth helpers to securely manage sessions during SSR.
+### Build
+
+```bash
+npm run build
+```
+
+With the Nitro Vite plugin configured, builds on CI auto-detect the target:
+
+| Platform | Env var (set automatically on CI) | Output |
+|----------|-------------------------------------|--------|
+| Vercel   | `VERCEL=1`                          | `.vercel/output/` |
+| Netlify  | `NETLIFY=true`                      | `.netlify/functions-internal/` + `dist/` |
+
+Override manually: `NITRO_PRESET=vercel npm run build` or `NITRO_PRESET=netlify npm run build`
+
+### Vercel
+
+1. **Framework preset:** TanStack Start (or Other with defaults below)
+2. **Build command:** `npm run build`
+3. **Output directory:** leave empty — Nitro emits `.vercel/output` (Build Output API)
+4. **Node.js:** 22.x (required by `@tanstack/react-start`)
+5. **Environment variables:** `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`
+6. Do **not** add a custom `vercel.json` that points at `dist/` — it bypasses the SSR handler
+7. After first fix deploy, use **Redeploy without build cache**
+
+### Netlify
+
+1. **Build command:** `npm run build`
+2. **Publish directory:** `dist` (Nitro + Netlify preset handles SSR functions)
+3. **Node.js:** 22.x
+4. **Environment variables:** same `VITE_*` vars as above
+5. `NETLIFY=true` is injected automatically; no custom redirects needed for SPA fallback
+
+### Local production preview
+
+```bash
+npm run build   # optional: VERCEL=1 for Vercel-shaped output
+npm run preview
+```
+
+Preview serves SSR correctly (routes like `/app/dashboard` return 200).
+
+### Database & Auth
+
+- **Database:** Managed Supabase PostgreSQL instance
+- **Authentication:** Supabase Auth with `VITE_*` public keys at build time
 
 ---
 
@@ -278,5 +304,5 @@ This project is private. All rights reserved.
 ## Author
 
 - **GitHub**: [Anirudhmahule](https://github.com/Anirudhmahule)
-- **LinkedIn**: [LinkedIn Profile](#)
-- **Portfolio**: [Portfolio Website](#)
+- **LinkedIn**: [LinkedIn Profile](www.linkedin.com/in/anirudh-mahule)
+- **Portfolio**: [Portfolio Website](https://anirudh-mahule-porfolio.vercel.app/)
