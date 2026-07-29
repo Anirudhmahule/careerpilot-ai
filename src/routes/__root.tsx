@@ -10,6 +10,8 @@ import {
 import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { AuthProvider } from "../features/auth/providers/AuthProvider";
+import { ThemeProvider } from "../components/theme-provider";
 
 function NotFoundComponent() {
   return (
@@ -74,13 +76,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "CareerPilot AI" },
-      { name: "description", content: "CareerPilot AI" },
-      { name: "author", content: "CareerPilot" },
+      { name: "description", content: "The engineering career operating system. Analyze your resume, identify skill gaps, and get a personalized roadmap to your next senior role." },
+      { name: "author", content: "Anirudhmahule" },
       { property: "og:title", content: "CareerPilot AI" },
-      { property: "og:description", content: "CareerPilot AI" },
+      { property: "og:description", content: "The engineering career operating system." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@CareerPilot" },
     ],
     links: [
       {
@@ -120,8 +121,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <ThemeProvider defaultTheme="system" storageKey="careerpilot-theme">
+        <AuthProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
